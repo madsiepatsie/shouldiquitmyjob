@@ -32,8 +32,8 @@
       }
 
       .magnetic-title span {
-        font-size: clamp(5rem, 15vw, 10rem);
-        font-weight: 400;
+        font-size: clamp(2.5rem, 7vw, 6rem);
+        font-weight: 900;
         color: #202124;
         display: inline-block;
         transition: transform 0.2s ease, color 0.2s ease;
@@ -265,21 +265,21 @@
 
       show('start')
 
-      // Magnetic title effect
+      // Magnetic title effect - mouse and touch
       const letters = document.querySelectorAll('.magnetic-title span')
 
-      document.addEventListener('mousemove', (e) => {
+      function applyMagnet(clientX, clientY) {
         letters.forEach(letter => {
           const rect = letter.getBoundingClientRect()
           const centerX = rect.left + rect.width / 2
           const centerY = rect.top + rect.height / 2
-          const distX = e.clientX - centerX
-          const distY = e.clientY - centerY
+          const distX = clientX - centerX
+          const distY = clientY - centerY
           const dist = Math.sqrt(distX * distX + distY * distY)
           const maxDist = 150
 
           if (dist < maxDist) {
-            const force = (1 - dist / maxDist) * 68
+            const force = (1 - dist / maxDist) * 60
             const moveX = (distX / dist) * force
             const moveY = (distY / dist) * force
             letter.style.transform = `translate(${moveX}px, ${moveY}px)`
@@ -288,6 +288,22 @@
             letter.style.transform = 'translate(0, 0)'
             letter.style.color = '#202124'
           }
+        })
+      }
+
+      document.addEventListener('mousemove', (e) => {
+        applyMagnet(e.clientX, e.clientY)
+      })
+
+      document.addEventListener('touchmove', (e) => {
+        const touch = e.touches[0]
+        applyMagnet(touch.clientX, touch.clientY)
+      }, { passive: true })
+
+      document.addEventListener('touchend', () => {
+        letters.forEach(letter => {
+          letter.style.transform = 'translate(0, 0)'
+          letter.style.color = '#202124'
         })
       })
     </script>
