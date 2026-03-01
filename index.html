@@ -279,7 +279,7 @@
           const maxDist = 150
 
           if (dist < maxDist) {
-            const force = (1 - dist / maxDist) * 25
+            const force = (1 - dist / maxDist) * 68
             const moveX = (distX / dist) * force
             const moveY = (distY / dist) * force
             letter.style.transform = `translate(${moveX}px, ${moveY}px)`
