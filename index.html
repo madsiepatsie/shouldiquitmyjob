@@ -106,8 +106,8 @@
 
       .btn-no {
         background: #ffffff;
-        color: #e80c0c;
-        border: 2px solid #e80c0c;
+        color: #1b870b;
+        border: 2px solid #1a73e8;
       }
 
       .btn-restart {
@@ -246,6 +246,7 @@
       }
 
       async function showStats(myResult) {
+        document.getElementById('showStats').style.display = 'none'
         const { data } = await db.from('results').select('*')
         if (!data || data.length === 0) return
 
@@ -284,7 +285,7 @@
           document.getElementById('result').innerHTML = `
             <p>${results[key]}</p>
             <br>
-            <button class="btn-stats" onclick="showStats('${key}')">See how others answered</button>
+            <button class="btn-stats" id="showStats"onclick="showStats('${key}')">See how others answered</button>
             <br>
             <button class="btn-restart" onclick="show('start')">Start over</button>
           `
