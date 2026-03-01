@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Should I Quit My Job?</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: #f8f9fa;
+        font-family: 'Roboto', sans-serif;
+        padding: 24px;
+      }
+
+      .logo {
+        font-family: 'Roboto', sans-serif;
+        font-size: 1rem;
+        font-weight: 500;
+        color: #5f6368;
+        letter-spacing: 0.5px;
+        margin-bottom: 32px;
+        text-transform: uppercase;
+      }
+
+      .card {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 48px 40px;
+        max-width: 560px;
+        width: 100%;
+        text-align: center;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.08);
+      }
+
+      h1 {
+        font-family: 'Roboto', sans-serif;
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #202124;
+        margin-bottom: 8px;
+      }
+
+      .subtitle {
+        font-size: 0.95rem;
+        color: #5f6368;
+        margin-bottom: 40px;
+      }
+
+      .divider {
+        height: 1px;
+        background: #e8eaed;
+        margin-bottom: 36px;
+      }
+
+      #question {
+        font-size: 1.3rem;
+        font-weight: 500;
+        color: #202124;
+        margin-bottom: 32px;
+        line-height: 1.6;
+      }
+
+      #answers {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      button {
+        padding: 14px 36px;
+        font-size: 0.95rem;
+        font-family: 'Roboto', sans-serif;
+        font-weight: 500;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: box-shadow 0.2s, transform 0.1s;
+        letter-spacing: 0.3px;
+      }
+
+      button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      .btn-yes {
+        background: #1a73e8;
+        color: white;
+      }
+
+      .btn-no {
+        background: #ffffff;
+        color: #1a73e8;
+        border: 2px solid #1a73e8;
+      }
+
+      .btn-restart {
+        background: #f1f3f4;
+        color: #202124;
+        margin-top: 16px;
+      }
+
+      .btn-stats {
+        background: #1a73e8;
+        color: white;
+        margin-top: 16px;
+      }
+
+      #result {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #202124;
+        line-height: 1.5;
+      }
+
+      #result p {
+        margin-bottom: 8px;
+      }
+
+      #stats {
+        margin-top: 28px;
+        text-align: left;
+      }
+
+      .stats-title {
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: #5f6368;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        margin-bottom: 16px;
+      }
+
+      .stat-bar-wrap {
+        margin: 12px 0;
+      }
+
+      .stat-label {
+        font-size: 0.9rem;
+        color: #202124;
+        margin-bottom: 6px;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .stat-bar-bg {
+        background: #e8eaed;
+        border-radius: 50px;
+        height: 8px;
+        width: 100%;
+      }
+
+      .stat-bar-fill {
+        background: #1a73e8;
+        border-radius: 50px;
+        height: 8px;
+        transition: width 0.6s ease;
+      }
+
+      .stat-bar-fill.mine {
+        background: #34a853;
+      }
+
+      @media (max-width: 480px) {
+        .card {
+          padding: 36px 24px;
+        }
+
+        h1 {
+          font-size: 1.4rem;
+        }
+
+        #question {
+          font-size: 1.1rem;
+        }
+
+        button {
+          padding: 14px 28px;
+          width: 100%;
+        }
+
+        #answers {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="logo">shouldiquitmyjob.io</div>
+    <div class="card">
+      <h1>Should I Quit My Job?</h1>
+      <p class="subtitle">Answer honestly. We won't judge. Much.</p>
+      <div class="divider"></div>
+      <div id="question"></div>
+      <div id="answers"></div>
+      <div id="result"></div>
+      <div id="stats"></div>
+    </div>
+
+    <script>
+      const { createClient } = supabase
+      const db = createClient(
+        'https://tseioongwfovxemncfko.supabase.co',
+        'sb_publishable_lLvKJsgNsZTdnqFrFLMtmA_ys9T1bUN'
+      )
+
+      const questions = {
+        start: { text: "Do you like your job?", yes: "pays_enough", no: "need_money" },
+        need_money: { text: "Do you even need more money?", yes: "take_risks", no: "quit" },
+        take_risks: { text: "Do you often take risks?", yes: "you_know", no: "yolo" },
+        pays_enough: { text: "Does it pay enough?", yes: "stay", no: "do_more" },
+        do_more: { text: "Do you feel like you can do more?", yes: "raise", no: "raise" }
+      }
+
+      const results = {
+        quit: "Yes, you should definitely quit. 👋",
+        you_know: "You know what to do. 😏",
+        yolo: "Take more risks. YOLO. 🤙",
+        stay: "Stay. You've got it good. 😌",
+        raise: "Don't quit, but ask for a raise or a different role. 💼"
+      }
+
+      async function recordResult(key) {
+        const { data } = await db.from('results').select('*').eq('result', key).single()
+        if (data) {
+          await db.from('results').update({ count: data.count + 1 }).eq('result', key)
+        } else {
+          await db.from('results').insert({ result: key, count: 1 })
+        }
+      }
+
+      async function showStats(myResult) {
+        const { data } = await db.from('results').select('*')
+        if (!data || data.length === 0) return
+
+        const total = data.reduce((sum, row) => sum + row.count, 0)
+        const mine = data.find(r => r.result === myResult)
+        const myPercent = mine ? Math.round((mine.count / total) * 100) : 0
+
+        let html = `<div class="stats-title">You're in the ${myPercent}% who got this result</div>`
+
+        data.sort((a, b) => b.count - a.count).forEach(row => {
+          const pct = Math.round((row.count / total) * 100)
+          const ismine = row.result === myResult
+          html += `
+            <div class="stat-bar-wrap">
+              <div class="stat-label">
+                <span>${results[row.result]}</span>
+                <span>${pct}%</span>
+              </div>
+              <div class="stat-bar-bg">
+                <div class="stat-bar-fill ${ismine ? 'mine' : ''}" style="width:${pct}%"></div>
+              </div>
+            </div>`
+        })
+
+        document.getElementById('stats').innerHTML = html
+      }
+
+      async function show(key) {
+        document.getElementById('result').innerHTML = ''
+        document.getElementById('stats').innerHTML = ''
+
+        if (results[key]) {
+          document.getElementById('question').innerHTML = ''
+          document.getElementById('answers').innerHTML = ''
+          await recordResult(key)
+          document.getElementById('result').innerHTML = `
+            <p>${results[key]}</p>
+            <br>
+            <button class="btn-stats" onclick="showStats('${key}')">See how others answered</button>
+            <br>
+            <button class="btn-restart" onclick="show('start')">Start over</button>
+          `
+          return
+        }
+
+        const q = questions[key]
+        document.getElementById('question').innerHTML = q.text
+        document.getElementById('answers').innerHTML = `
+          <button class="btn-yes" onclick="show('${q.yes}')">Yes</button>
+          <button class="btn-no" onclick="show('${q.no}')">No</button>
+        `
+      }
+
+      show('start')
+    </script>
+  </body>
+</html>
