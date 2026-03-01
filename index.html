@@ -3,7 +3,7 @@
   <head>
     <title>Should I Quit My Job?</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
       * {
@@ -23,14 +23,22 @@
         padding: 24px;
       }
 
-      .logo {
-        font-family: 'Roboto', sans-serif;
-        font-size: 3rem;
-        font-weight: 500;
-        color: #5f6368;
-        letter-spacing: 0.5px;
+      .magnetic-title {
+        display: flex;
+        justify-content: center;
         margin-bottom: 32px;
-        text-transform: uppercase;
+        width: 95vw;
+        max-width: 900px;
+      }
+
+      .magnetic-title span {
+        font-size: clamp(2rem, 5.5vw, 4.5rem);
+        font-weight: 900;
+        color: #202124;
+        display: inline-block;
+        transition: transform 0.2s ease, color 0.2s ease;
+        cursor: default;
+        line-height: 1;
       }
 
       .card {
@@ -41,14 +49,6 @@
         width: 100%;
         text-align: center;
         box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.08);
-      }
-
-      h1 {
-        font-family: 'Roboto', sans-serif;
-        font-size: 1.75rem;
-        font-weight: 700;
-        color: #202124;
-        margin-bottom: 8px;
       }
 
       .subtitle {
@@ -99,28 +99,10 @@
         transform: translateY(0);
       }
 
-      .btn-yes {
-        background: #1fa818;
-        color: white;
-      }
-
-      .btn-no {
-        background: #ffffff;
-        color: #d40d0d;
-        border: 5px solid #d40d0d;
-      }
-
-      .btn-restart {
-        background: #f1f3f4;
-        color: #202124;
-        margin-top: 16px;
-      }
-
-      .btn-stats {
-        background: #1a73e8;
-        color: white;
-        margin-top: 16px;
-      }
+      .btn-yes { background: #1fa818; color: white; }
+      .btn-no { background: #ffffff; color: #d40d0d; border: 5px solid #d40d0d; }
+      .btn-restart { background: #f1f3f4; color: #202124; margin-top: 16px; }
+      .btn-stats { background: #1a73e8; color: white; margin-top: 16px; }
 
       #result {
         font-size: 1.4rem;
@@ -129,9 +111,7 @@
         line-height: 1.5;
       }
 
-      #result p {
-        margin-bottom: 8px;
-      }
+      #result p { margin-bottom: 8px; }
 
       #stats {
         margin-top: 28px;
@@ -147,9 +127,7 @@
         margin-bottom: 16px;
       }
 
-      .stat-bar-wrap {
-        margin: 12px 0;
-      }
+      .stat-bar-wrap { margin: 12px 0; }
 
       .stat-label {
         font-size: 0.9rem;
@@ -173,38 +151,23 @@
         transition: width 0.6s ease;
       }
 
-      .stat-bar-fill.mine {
-        background: #34a853;
-      }
+      .stat-bar-fill.mine { background: #34a853; }
 
       @media (max-width: 480px) {
-        .card {
-          padding: 36px 24px;
-        }
-
-        h1 {
-          font-size: 1.4rem;
-        }
-
-        #question {
-          font-size: 1.1rem;
-        }
-
-        button {
-          padding: 14px 28px;
-          width: 100%;
-        }
-
-        #answers {
-          flex-direction: column;
-        }
+        .card { padding: 36px 24px; }
+        #question { font-size: 1.1rem; }
+        button { padding: 14px 28px; width: 100%; }
+        #answers { flex-direction: column; }
       }
     </style>
   </head>
   <body>
-<img src="logo.jpg" alt="Should I Quit My Job?" style="max-width: 400px; width: 90%; margin-bottom: 32px;">32px;">
+
+    <div class="magnetic-title" id="magneticTitle">
+      <span>s</span><span>h</span><span>o</span><span>u</span><span>l</span><span>d</span><span>i</span><span>q</span><span>u</span><span>i</span><span>t</span><span>m</span><span>y</span><span>j</span><span>o</span><span>b</span>
+    </div>
+
     <div class="card">
-      <h1></h1>
       <p class="subtitle">you will know after this</p>
       <div class="divider"></div>
       <div id="question"></div>
@@ -285,7 +248,7 @@
           document.getElementById('result').innerHTML = `
             <p>${results[key]}</p>
             <br>
-            <button class="btn-stats" id="showStats"onclick="showStats('${key}')">See how others answered</button>
+            <button class="btn-stats" id="showStats" onclick="showStats('${key}')">See how others answered</button>
             <br>
             <button class="btn-restart" onclick="show('start')">Start over</button>
           `
@@ -301,6 +264,32 @@
       }
 
       show('start')
+
+      // Magnetic title effect
+      const letters = document.querySelectorAll('.magnetic-title span')
+
+      document.addEventListener('mousemove', (e) => {
+        letters.forEach(letter => {
+          const rect = letter.getBoundingClientRect()
+          const centerX = rect.left + rect.width / 2
+          const centerY = rect.top + rect.height / 2
+          const distX = e.clientX - centerX
+          const distY = e.clientY - centerY
+          const dist = Math.sqrt(distX * distX + distY * distY)
+          const maxDist = 150
+
+          if (dist < maxDist) {
+            const force = (1 - dist / maxDist) * 25
+            const moveX = (distX / dist) * force
+            const moveY = (distY / dist) * force
+            letter.style.transform = `translate(${moveX}px, ${moveY}px)`
+            letter.style.color = `hsl(${Math.round(Math.random() * 360)}, 70%, 45%)`
+          } else {
+            letter.style.transform = 'translate(0, 0)'
+            letter.style.color = '#202124'
+          }
+        })
+      })
     </script>
   </body>
 </html>
