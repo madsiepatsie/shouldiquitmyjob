@@ -19,9 +19,24 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        background: #f8f9fa;
         font-family: 'Roboto', sans-serif;
         padding: 24px;
+        overflow: hidden;
+        position: relative;
+      }
+
+      canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+      }
+
+      .magnetic-title, .card {
+        position: relative;
+        z-index: 1;
       }
 
       .magnetic-title {
@@ -35,7 +50,8 @@
       .magnetic-title span {
         font-size: clamp(2.5rem, 7vw, 6rem);
         font-weight: 900;
-        color: #202124;
+        color: white;
+        text-shadow: 0 2px 12px rgba(0,0,0,0.4);
         display: inline-block;
         transition: transform 0.2s ease, color 0.2s ease;
         cursor: default;
@@ -43,31 +59,34 @@
       }
 
       .card {
-        background: #ffffff;
+        background: rgba(255,255,255,0.15);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255,255,255,0.3);
         border-radius: 16px;
         padding: 48px 40px;
         max-width: 560px;
         width: 100%;
         text-align: center;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.08);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.2);
       }
 
       .subtitle {
         font-size: 0.95rem;
-        color: #5f6368;
+        color: rgba(255,255,255,0.85);
         margin-bottom: 40px;
       }
 
       .divider {
         height: 1px;
-        background: #e8eaed;
+        background: rgba(255,255,255,0.3);
         margin-bottom: 36px;
       }
 
       #question {
         font-size: 1.3rem;
         font-weight: 500;
-        color: #202124;
+        color: white;
         margin-bottom: 32px;
         line-height: 1.6;
       }
@@ -93,22 +112,20 @@
 
       button:hover {
         transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
       }
 
-      button:active {
-        transform: translateY(0);
-      }
+      button:active { transform: translateY(0); }
 
       .btn-yes { background: #1fa818; color: white; }
       .btn-no { background: #ffffff; color: #d40d0d; border: 5px solid #d40d0d; }
-      .btn-restart { background: #f1f3f4; color: #202124; margin-top: 16px; }
-      .btn-stats { background: #1a73e8; color: white; margin-top: 16px; }
+      .btn-restart { background: rgba(255,255,255,0.2); color: white; margin-top: 16px; border: 1px solid rgba(255,255,255,0.4); }
+      .btn-stats { background: rgba(255,255,255,0.9); color: #1a73e8; margin-top: 16px; font-weight: 700; }
 
       #result {
         font-size: 1.4rem;
         font-weight: 700;
-        color: #202124;
+        color: white;
         line-height: 1.5;
       }
 
@@ -122,7 +139,7 @@
       .stats-title {
         font-size: 0.85rem;
         font-weight: 500;
-        color: #5f6368;
+        color: rgba(255,255,255,0.8);
         text-transform: uppercase;
         letter-spacing: 0.8px;
         margin-bottom: 16px;
@@ -132,27 +149,27 @@
 
       .stat-label {
         font-size: 0.9rem;
-        color: #202124;
+        color: white;
         margin-bottom: 6px;
         display: flex;
         justify-content: space-between;
       }
 
       .stat-bar-bg {
-        background: #e8eaed;
+        background: rgba(255,255,255,0.2);
         border-radius: 50px;
         height: 8px;
         width: 100%;
       }
 
       .stat-bar-fill {
-        background: #1a73e8;
+        background: rgba(255,255,255,0.8);
         border-radius: 50px;
         height: 8px;
         transition: width 0.6s ease;
       }
 
-      .stat-bar-fill.mine { background: #34a853; }
+      .stat-bar-fill.mine { background: #4cff72; }
 
       @media (max-width: 480px) {
         .card { padding: 36px 24px; }
@@ -163,6 +180,7 @@
     </style>
   </head>
   <body>
+    <canvas id="portal"></canvas>
 
     <div class="magnetic-title" id="magneticTitle">
       <span>s</span><span>h</span><span>o</span><span>u</span><span>l</span><span>d</span><span>i</span><span>q</span><span>u</span><span>i</span><span>t</span><span>m</span><span>y</span><span>j</span><span>o</span><span>b</span>
@@ -178,6 +196,72 @@
     </div>
 
     <script>
+      // Portal background
+      const canvas = document.getElementById('portal')
+      const ctx = canvas.getContext('2d')
+      let t = 0
+
+      function resize() {
+        canvas.width = window.innerWidth
+        canvas.height = window.innerHeight
+      }
+      resize()
+      window.addEventListener('resize', resize)
+
+      function drawPortal() {
+        const w = canvas.width
+        const h = canvas.height
+        const cx = w / 2
+        const cy = h / 2
+        const maxR = Math.sqrt(cx * cx + cy * cy)
+
+        ctx.clearRect(0, 0, w, h)
+
+        const dominance = (Math.sin(t * 0.3) + 1) / 2
+
+        const numRings = 18
+        for (let i = numRings; i >= 0; i--) {
+          const angle = t + (i * 0.4)
+          const r = (i / numRings) * maxR
+          const greenAmount = dominance * (1 - i / numRings) + (i / numRings) * (1 - dominance)
+          const red = Math.round(220 * (1 - greenAmount) + 20 * greenAmount)
+          const green = Math.round(20 * (1 - greenAmount) + 200 * greenAmount)
+
+          const grad = ctx.createRadialGradient(
+            cx + Math.cos(angle) * r * 0.1,
+            cy + Math.sin(angle) * r * 0.1,
+            0, cx, cy, r
+          )
+          grad.addColorStop(0, `rgba(${red},${green},30,0)`)
+          grad.addColorStop(1, `rgba(${red},${green},30,0.85)`)
+
+          ctx.beginPath()
+          ctx.arc(cx, cy, r, 0, Math.PI * 2)
+          ctx.fillStyle = grad
+          ctx.fill()
+        }
+
+        for (let i = 0; i < 6; i++) {
+          const angle = t * 0.8 + (i / 6) * Math.PI * 2
+          ctx.beginPath()
+          for (let r = 0; r < maxR; r += 4) {
+            const a = angle + r * 0.012
+            const x = cx + Math.cos(a) * r
+            const y = cy + Math.sin(a) * r
+            r === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y)
+          }
+          const greenAmt = (Math.sin(t * 0.3 + i) + 1) / 2
+          ctx.strokeStyle = `rgba(${Math.round(255 * (1-greenAmt))},${Math.round(255 * greenAmt)},0,0.15)`
+          ctx.lineWidth = 2
+          ctx.stroke()
+        }
+
+        t += 0.02
+        requestAnimationFrame(drawPortal)
+      }
+      drawPortal()
+
+      // Supabase
       const { createClient } = supabase
       const db = createClient(
         'https://tseioongwfovxemncfko.supabase.co',
@@ -266,7 +350,7 @@
 
       show('start')
 
-      // Magnetic title effect - mouse and touch
+      // Magnetic title
       const letters = document.querySelectorAll('.magnetic-title span')
 
       function applyMagnet(clientX, clientY) {
@@ -284,27 +368,23 @@
             const moveX = (distX / dist) * force
             const moveY = (distY / dist) * force
             letter.style.transform = `translate(${moveX}px, ${moveY}px)`
-            letter.style.color = `hsl(${Math.round(Math.random() * 360)}, 70%, 45%)`
+            letter.style.color = `hsl(${Math.round(Math.random() * 360)}, 70%, 75%)`
           } else {
             letter.style.transform = 'translate(0, 0)'
-            letter.style.color = '#202124'
+            letter.style.color = 'white'
           }
         })
       }
 
-      document.addEventListener('mousemove', (e) => {
-        applyMagnet(e.clientX, e.clientY)
-      })
-
+      document.addEventListener('mousemove', (e) => applyMagnet(e.clientX, e.clientY))
       document.addEventListener('touchmove', (e) => {
         const touch = e.touches[0]
         applyMagnet(touch.clientX, touch.clientY)
       }, { passive: true })
-
       document.addEventListener('touchend', () => {
         letters.forEach(letter => {
           letter.style.transform = 'translate(0, 0)'
-          letter.style.color = '#202124'
+          letter.style.color = 'white'
         })
       })
     </script>
