@@ -1,570 +1,318 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💼</text></svg>">
-    <title>Should I Quit My Job?</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-      * { box-sizing: border-box; margin: 0; padding: 0; }
-      body {
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        font-family: 'Roboto', sans-serif;
-        padding: 24px;
-        overflow: hidden;
-        position: relative;
-      }
-      canvas#portal {
-        position: fixed;
-        top: 0; left: 0;
-        width: 100%; height: 100%;
-        z-index: 0;
-      }
-      canvas#scene {
-        position: fixed;
-        bottom: 0; left: 0;
-        width: 100%; height: 160px;
-        z-index: 2;
-        pointer-events: none;
-      }
-      .magnetic-title, .card { position: relative; z-index: 1; }
-      .magnetic-title {
-        display: flex;
-        justify-content: center;
-        margin-bottom: 32px;
-        width: 95vw;
-        max-width: 900px;
-      }
-      .magnetic-title span {
-        font-size: clamp(2.5rem, 7vw, 6rem);
-        font-weight: 900;
-        color: white;
+font-size: clamp(2.5rem, 7vw, 6rem);
+font-weight: 900;
+color: white;
+        text-shadow: 0 0 20px rgba(255,100,0,0.8), 0 2px 12px rgba(0,0,0,0.6);
         text-shadow: 0 0 30px rgba(0,255,80,0.9), 0 0 60px rgba(255,0,0,0.5), 0 2px 12px rgba(0,0,0,0.8);
-        display: inline-block;
-        transition: transform 0.2s ease, color 0.2s ease;
-        cursor: default;
-        line-height: 1;
-      }
-      .card {
+display: inline-block;
+transition: transform 0.2s ease, color 0.2s ease;
+cursor: default;
+line-height: 1;
+}
+
+.card {
+        background: rgba(0,0,0,0.4);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255,255,255,0.15);
         background: rgba(0,0,0,0.55);
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
         border: 1px solid rgba(255,255,255,0.1);
-        border-radius: 16px;
-        padding: 48px 40px;
-        max-width: 560px;
-        width: 100%;
-        text-align: center;
+border-radius: 16px;
+padding: 48px 40px;
+max-width: 560px;
+width: 100%;
+text-align: center;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.5);
         box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 60px rgba(0,200,50,0.15);
+}
+
+      .subtitle { font-size: 0.95rem; color: rgba(255,255,255,0.75); margin-bottom: 40px; }
+      .divider { height: 1px; background: rgba(255,255,255,0.15); margin-bottom: 36px; }
+
+      #question {
+        font-size: 1.3rem;
+        font-weight: 500;
+        color: white;
+        margin-bottom: 32px;
+        line-height: 1.6;
       }
       .subtitle { font-size: 0.95rem; color: rgba(255,255,255,0.7); margin-bottom: 40px; }
       .divider { height: 1px; background: rgba(255,255,255,0.1); margin-bottom: 36px; }
+
       #question { font-size: 1.3rem; font-weight: 500; color: white; margin-bottom: 32px; line-height: 1.6; }
-      #answers { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-      button {
-        padding: 14px 36px;
-        font-size: 0.95rem;
-        font-family: 'Roboto', sans-serif;
-        font-weight: 500;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: box-shadow 0.2s, transform 0.1s;
-        letter-spacing: 0.3px;
-      }
+#answers { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+button {
+@@ -87,32 +80,24 @@
+letter-spacing: 0.3px;
+}
+
+      button:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
       button:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,0.5); }
-      button:active { transform: translateY(0); }
+button:active { transform: translateY(0); }
+
+      .btn-yes { background: #1fa818; color: white; }
       .btn-yes { background: #1fa818; color: white; box-shadow: 0 0 20px rgba(31,168,24,0.4); }
-      .btn-no { background: #ffffff; color: #d40d0d; border: 5px solid #d40d0d; }
+.btn-no { background: #ffffff; color: #d40d0d; border: 5px solid #d40d0d; }
+      .btn-restart { background: rgba(255,255,255,0.15); color: white; margin-top: 16px; border: 1px solid rgba(255,255,255,0.3); }
+      .btn-stats { background: rgba(255,255,255,0.9); color: #1a73e8; margin-top: 16px; font-weight: 700; }
       .btn-restart { background: rgba(255,255,255,0.12); color: white; margin-top: 16px; border: 1px solid rgba(255,255,255,0.2); }
       .btn-stats { background: rgba(255,255,255,0.92); color: #1a73e8; margin-top: 16px; font-weight: 700; }
-      #result { font-size: 1.4rem; font-weight: 700; color: white; line-height: 1.5; }
-      #result p { margin-bottom: 8px; }
-      #stats { margin-top: 28px; text-align: left; }
+
+#result { font-size: 1.4rem; font-weight: 700; color: white; line-height: 1.5; }
+#result p { margin-bottom: 8px; }
+#stats { margin-top: 28px; text-align: left; }
+
+      .stats-title {
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: rgba(255,255,255,0.7);
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        margin-bottom: 16px;
+      }
+
       .stats-title { font-size: 0.85rem; font-weight: 500; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 16px; }
-      .stat-bar-wrap { margin: 12px 0; }
-      .stat-label { font-size: 0.9rem; color: white; margin-bottom: 6px; display: flex; justify-content: space-between; }
+.stat-bar-wrap { margin: 12px 0; }
+.stat-label { font-size: 0.9rem; color: white; margin-bottom: 6px; display: flex; justify-content: space-between; }
+      .stat-bar-bg { background: rgba(255,255,255,0.15); border-radius: 50px; height: 8px; width: 100%; }
+      .stat-bar-fill { background: rgba(255,255,255,0.7); border-radius: 50px; height: 8px; transition: width 0.6s ease; }
+      .stat-bar-fill.mine { background: #4cff72; }
       .stat-bar-bg { background: rgba(255,255,255,0.12); border-radius: 50px; height: 8px; width: 100%; }
       .stat-bar-fill { background: rgba(255,255,255,0.6); border-radius: 50px; height: 8px; transition: width 0.6s ease; }
       .stat-bar-fill.mine { background: #4cff72; box-shadow: 0 0 8px #4cff72; }
-      @media (max-width: 480px) {
-        .card { padding: 36px 24px; }
-        #question { font-size: 1.1rem; }
-        button { padding: 14px 28px; width: 100%; }
-        #answers { flex-direction: column; }
+
+@media (max-width: 480px) {
+.card { padding: 36px 24px; }
+@@ -139,98 +124,155 @@
+</div>
+
+<script>
+      // Flame portal
+      // WebGL nether portal shader
+const canvas = document.getElementById('portal')
+      const ctx = canvas.getContext('2d')
+      let t = 0
+      const gl = canvas.getContext('webgl')
+
+function resize() {
+canvas.width = window.innerWidth
+canvas.height = window.innerHeight
+        gl.viewport(0, 0, canvas.width, canvas.height)
+}
+resize()
+window.addEventListener('resize', resize)
+
+      // Noise helper for flame texture
+      function noise(x, y, t) {
+        return Math.sin(x * 3.1 + t) * Math.cos(y * 2.7 - t * 0.8) +
+               Math.sin(x * 1.7 - t * 1.2) * Math.cos(y * 4.1 + t * 0.6) +
+               Math.sin((x + y) * 2.3 + t * 0.9) * 0.5
       }
-    </style>
-  </head>
-  <body>
-    <canvas id="portal"></canvas>
-    <canvas id="scene"></canvas>
 
-    <div class="magnetic-title" id="magneticTitle">
-      <span>s</span><span>h</span><span>o</span><span>u</span><span>l</span><span>d</span><span>i</span><span>q</span><span>u</span><span>i</span><span>t</span><span>m</span><span>y</span><span>j</span><span>o</span><span>b</span>
-    </div>
+      function drawPortal() {
+        const w = canvas.width
+        const h = canvas.height
+        const cx = w / 2
+        const cy = h / 2
+        const maxR = Math.sqrt(cx * cx + cy * cy)
 
-    <div class="card">
-      <p class="subtitle">you will know after this</p>
-      <div class="divider"></div>
-      <div id="question"></div>
-      <div id="answers"></div>
-      <div id="result"></div>
-      <div id="stats"></div>
-    </div>
+        // Dark base
+        ctx.fillStyle = '#050505'
+        ctx.fillRect(0, 0, w, h)
+      const vert = `
+        attribute vec2 a_pos;
+        void main() { gl_Position = vec4(a_pos, 0, 1); }
+      `
 
-    <script>
-      // ── PORTAL WebGL ─────────────────────────────────────────────────
-      const portalCanvas = document.getElementById('portal')
-      const gl = portalCanvas.getContext('webgl')
-      function resizePortal() {
-        portalCanvas.width = window.innerWidth
-        portalCanvas.height = window.innerHeight
-        gl.viewport(0, 0, portalCanvas.width, portalCanvas.height)
-      }
-      resizePortal()
-      window.addEventListener('resize', resizePortal)
-
-      const vert = `attribute vec2 a_pos; void main(){gl_Position=vec4(a_pos,0,1);}`
+        const dominance = (Math.sin(t * 0.25) + 1) / 2 // 0=red, 1=green
       const frag = `
         precision highp float;
-        uniform vec2 u_res; uniform float u_time;
-        vec2 hash2(vec2 p){p=vec2(dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3)));return -1.0+2.0*fract(sin(p)*43758.5453123);}
-        float noise(vec2 p){vec2 i=floor(p),f=fract(p),u=f*f*(3.0-2.0*f);return mix(mix(dot(hash2(i),f),dot(hash2(i+vec2(1,0)),f-vec2(1,0)),u.x),mix(dot(hash2(i+vec2(0,1)),f-vec2(0,1)),dot(hash2(i+vec2(1,1)),f-vec2(1,1)),u.x),u.y);}
-        float fbm(vec2 p){float v=0.0,a=0.5;mat2 rot=mat2(cos(0.5),sin(0.5),-sin(0.5),cos(0.5));for(int i=0;i<6;i++){v+=a*noise(p);p=rot*p*2.0+vec2(100.0);a*=0.5;}return v;}
-        void main(){
-          vec2 uv=(gl_FragCoord.xy-u_res*0.5)/min(u_res.x,u_res.y);
-          float dist=length(uv),angle=atan(uv.y,uv.x);
-          float spiral=angle/(2.0*3.14159)+dist*2.5-u_time*0.4;
-          vec2 tuv=vec2(spiral*3.0+dist*2.0,dist*4.0-u_time*0.6);
-          float q1=fbm(tuv+u_time*0.15),q2=fbm(tuv+vec2(q1*1.5,q1)+u_time*0.1);
-          float portal=fbm(tuv+vec2(q1,q2)*1.8);
-          float sh=sin(u_time*0.3)*0.5+0.5;
-          float mid=smoothstep(0.9,0.3,dist),edge=smoothstep(1.1,0.5,dist);
-          float flame=pow(portal*0.5+0.5,1.4);
-          float g=flame*sh*1.4*mid,r=flame*(1.0-sh)*1.4*mid;
-          float core=pow(smoothstep(0.6,0.0,dist),2.0)*0.8;
-          r+=core*0.6;g+=core*0.9;float b=core*0.3;
-          float vd=smoothstep(0.15,0.05,dist);
-          r=mix(r,0.0,vd);g=mix(g,0.02,vd);b=mix(b,0.05,vd);
-          float outer=smoothstep(1.05,0.7,dist);
-          r*=outer*edge;g*=outer*edge;b*=outer;
-          float shim=sin(spiral*20.0+u_time*3.0)*0.04*mid;
-          g+=shim*sh;r+=shim*(1.0-sh);
-          gl_FragColor=vec4(r,g,b,1.0);
+        uniform vec2 u_res;
+        uniform float u_time;
+
+        // Draw flame spiral arms
+        const numArms = 8
+        for (let arm = 0; arm < numArms; arm++) {
+          const armAngle = (arm / numArms) * Math.PI * 2
+
+          for (let r = maxR; r > 5; r -= 3) {
+            const progress = r / maxR // 1 at edge, 0 at center
+            const spiralAngle = armAngle - t * 1.5 + progress * 12 // spiral inward
+
+            // Flame flicker using noise
+            const flicker = noise(arm * 0.5, progress * 4, t * 2) * 0.3
+            const flickerR = r * (1 + flicker * 0.08)
+
+            const x = cx + Math.cos(spiralAngle) * flickerR
+            const y = cy + Math.sin(spiralAngle) * flickerR
+
+            // Color: alternate green/red per arm, shift with dominance
+            const armIsGreen = (arm % 2 === 0)
+            const greenBias = armIsGreen ? dominance : (1 - dominance)
+            const flameMix = greenBias + flicker * 0.3
+
+            const red = Math.round(255 * Math.max(0, Math.min(1, 1 - flameMix * 0.85)))
+            const green = Math.round(255 * Math.max(0, Math.min(1, flameMix * 0.9)))
+            const alpha = (1 - progress * 0.6) * 0.7 + Math.abs(flicker) * 0.2
+        // Hash for noise
+        vec2 hash2(vec2 p) {
+          p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)));
+          return -1.0 + 2.0 * fract(sin(p) * 43758.5453123);
         }
+
+            // Flame tip brightens toward center
+            const brightness = 1 - progress * 0.7
+            const size = (1 - progress * 0.5) * (w * 0.018) * (1 + Math.abs(flicker) * 0.5)
+        // Gradient noise
+        float noise(vec2 p) {
+          vec2 i = floor(p);
+          vec2 f = fract(p);
+          vec2 u = f * f * (3.0 - 2.0 * f);
+          return mix(mix(dot(hash2(i + vec2(0,0)), f - vec2(0,0)),
+                         dot(hash2(i + vec2(1,0)), f - vec2(1,0)), u.x),
+                     mix(dot(hash2(i + vec2(0,1)), f - vec2(0,1)),
+                         dot(hash2(i + vec2(1,1)), f - vec2(1,1)), u.x), u.y);
+        }
+
+            ctx.beginPath()
+            ctx.arc(x, y, size, 0, Math.PI * 2)
+            ctx.fillStyle = `rgba(${Math.round(red * brightness + 255 * (1-brightness) * 0.3)},${Math.round(green * brightness + 200 * (1-brightness) * flameMix)},${Math.round(30 * brightness)},${alpha})`
+            ctx.fill()
+        // Fractal brownian motion - layered noise for turbulence
+        float fbm(vec2 p) {
+          float v = 0.0;
+          float a = 0.5;
+          vec2 shift = vec2(100.0);
+          mat2 rot = mat2(cos(0.5), sin(0.5), -sin(0.5), cos(0.5));
+          for (int i = 0; i < 6; i++) {
+            v += a * noise(p);
+            p = rot * p * 2.0 + shift;
+            a *= 0.5;
+         }
+          return v;
+        }
+
+        void main() {
+          vec2 uv = (gl_FragCoord.xy - u_res * 0.5) / min(u_res.x, u_res.y);
+
+          float dist = length(uv);
+          float angle = atan(uv.y, uv.x);
+
+          // Spiral toward center
+          float spiral = angle / (2.0 * 3.14159) + dist * 2.5 - u_time * 0.4;
+
+          // Turbulence coordinates
+          vec2 turbUV = vec2(
+            spiral * 3.0 + dist * 2.0,
+            dist * 4.0 - u_time * 0.6
+          );
+
+          // Main portal turbulence
+          float q1 = fbm(turbUV + u_time * 0.15);
+          float q2 = fbm(turbUV + vec2(q1 * 1.5, q1) + u_time * 0.1);
+          float portal = fbm(turbUV + vec2(q1, q2) * 1.8);
+
+          // Color oscillation - shift between green and red dominance
+          float shift = sin(u_time * 0.3) * 0.5 + 0.5;
+
+          // Portal glow layers
+          float innerGlow = smoothstep(0.6, 0.0, dist);
+          float midGlow = smoothstep(0.9, 0.3, dist);
+          float edge = smoothstep(1.1, 0.5, dist);
+
+          // Flame color mixing
+          float flame = portal * 0.5 + 0.5;
+          flame = pow(flame, 1.4);
+
+          // Green channel
+          float g = flame * shift * 1.4 * midGlow;
+          // Red channel  
+          float r = flame * (1.0 - shift) * 1.4 * midGlow;
+          // Add some yellow/white at hot core
+          float core = pow(innerGlow, 2.0) * 0.8;
+          r += core * 0.6;
+          g += core * 0.9;
+          float b = core * 0.3;
+
+          // Dark void at very center (like nether portal)
+          float void_ = smoothstep(0.15, 0.05, dist);
+          r = mix(r, 0.0, void_);
+          g = mix(g, 0.02, void_);
+          b = mix(b, 0.05, void_);
+
+          // Outer darkness
+          float outer = smoothstep(1.05, 0.7, dist);
+          r *= outer * edge;
+          g *= outer * edge;
+          b *= outer;
+
+          // Shimmer
+          float shimmer = sin(spiral * 20.0 + u_time * 3.0) * 0.04 * midGlow;
+          g += shimmer * shift;
+          r += shimmer * (1.0 - shift);
+
+          gl_FragColor = vec4(r, g, b, 1.0);
+       }
       `
-      function compile(type, src) { const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);return s; }
+
+      function compile(type, src) {
+        const s = gl.createShader(type)
+        gl.shaderSource(s, src)
+        gl.compileShader(s)
+        return s
+      }
+
+        // Bright hot core
+        const coreGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxR * 0.25)
+        const coreGreen = dominance
+        coreGrad.addColorStop(0, `rgba(255,255,${Math.round(200 * coreGreen)},0.95)`)
+        coreGrad.addColorStop(0.3, `rgba(${Math.round(255*(1-coreGreen))},${Math.round(255*coreGreen)},0,0.5)`)
+        coreGrad.addColorStop(1, 'rgba(0,0,0,0)')
+        ctx.beginPath()
+        ctx.arc(cx, cy, maxR * 0.25, 0, Math.PI * 2)
+        ctx.fillStyle = coreGrad
+        ctx.fill()
+
+        // Outer dark vignette
+        const vigGrad = ctx.createRadialGradient(cx, cy, maxR * 0.5, cx, cy, maxR)
+        vigGrad.addColorStop(0, 'rgba(0,0,0,0)')
+        vigGrad.addColorStop(1, 'rgba(0,0,0,0.85)')
+        ctx.beginPath()
+        ctx.arc(cx, cy, maxR, 0, Math.PI * 2)
+        ctx.fillStyle = vigGrad
+        ctx.fill()
+
+        t += 0.018
+        requestAnimationFrame(drawPortal)
       const prog = gl.createProgram()
       gl.attachShader(prog, compile(gl.VERTEX_SHADER, vert))
       gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, frag))
-      gl.linkProgram(prog); gl.useProgram(prog)
+      gl.linkProgram(prog)
+      gl.useProgram(prog)
+
       const buf = gl.createBuffer()
       gl.bindBuffer(gl.ARRAY_BUFFER, buf)
-      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,1]), gl.STATIC_DRAW)
-      const aloc = gl.getAttribLocation(prog,'a_pos')
-      gl.enableVertexAttribArray(aloc); gl.vertexAttribPointer(aloc,2,gl.FLOAT,false,0,0)
-      const uRes=gl.getUniformLocation(prog,'u_res'), uTime=gl.getUniformLocation(prog,'u_time')
-      const pStart = Date.now()
-      function renderPortal() {
-        const t=(Date.now()-pStart)/1000
-        gl.uniform2f(uRes,portalCanvas.width,portalCanvas.height)
-        gl.uniform1f(uTime,t)
-        gl.drawArrays(gl.TRIANGLE_STRIP,0,4)
-        requestAnimationFrame(renderPortal)
-      }
-      renderPortal()
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW)
 
-      // ── SCENE ────────────────────────────────────────────────────────
-      const sc = document.getElementById('scene')
-      const ctx = sc.getContext('2d')
+      const loc = gl.getAttribLocation(prog, 'a_pos')
+      gl.enableVertexAttribArray(loc)
+      gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0)
 
-      function resizeScene() { sc.width = window.innerWidth; sc.height = 160 }
-      resizeScene()
-      window.addEventListener('resize', resizeScene)
+      const uRes = gl.getUniformLocation(prog, 'u_res')
+      const uTime = gl.getUniformLocation(prog, 'u_time')
 
-      const SCENE_H = 160
-      const ROAD_TOP = SCENE_H - 50      // top of road
-      const ROAD_H = 50
-      const GROUND_Y = ROAD_TOP          // buildings sit on road top
-      const CAR_Y = ROAD_TOP + 8         // car sits ON the road
+      let start = Date.now()
+      function render() {
+        const t = (Date.now() - start) / 1000
+        gl.uniform2f(uRes, canvas.width, canvas.height)
+        gl.uniform1f(uTime, t)
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
+        requestAnimationFrame(render)
+}
+      drawPortal()
+      render()
 
-      const HOME_X = 20
-      const officeX = () => sc.width - 90
-
-      // Car starts parked outside home
-      let carX = HOME_X + 55
-      let carDir = 1
-
-      // Phase: 'home' | 'leaving_home' | 'driving_to_work' | 'work' | 'leaving_work' | 'driving_home'
-      let phase = 'home'
-      let lastPhaseChange = Date.now()
-      const WAIT_DURATION = 60000
-
-      const leavingHomeLines = [
-        "ugh, another day...",
-        "maybe i should just quit",
-        "i really don't like my job",
-        "why am i even doing this",
-        "is this really my life?",
-      ]
-      const leavingWorkLines = [
-        "actually that wasn't so bad",
-        "maybe i like this job",
-        "ok the pay is decent at least",
-        "could be worse i guess",
-        "see you tomorrow i suppose...",
-      ]
-
-      let speechText = ''
-      let speechOpacity = 0
-      let speechTimer = 0
-
-      function showSpeech(text) {
-        speechText = text
-        speechOpacity = 1
-        speechTimer = 240 // frames to show
-      }
-
-      function drawSpeechBubble(x, y, text) {
-        if (speechOpacity <= 0 || !text) return
-        ctx.save()
-        ctx.globalAlpha = speechOpacity
-        ctx.font = '11px Roboto, sans-serif'
-        const padding = 8
-        const maxWidth = 160
-        // Word wrap
-        const words = text.split(' ')
-        const lines = []
-        let line = ''
-        for (const word of words) {
-          const test = line + (line ? ' ' : '') + word
-          if (ctx.measureText(test).width > maxWidth) { lines.push(line); line = word }
-          else line = test
-        }
-        lines.push(line)
-        const lineH = 14
-        const bw = maxWidth + padding * 2
-        const bh = lines.length * lineH + padding * 2
-        let bx = x - bw / 2
-        // keep on screen
-        bx = Math.max(4, Math.min(sc.width - bw - 4, bx))
-        const by = y - bh - 12
-
-        // Bubble
-        ctx.fillStyle = 'white'
-        ctx.beginPath()
-        ctx.roundRect(bx, by, bw, bh, 8)
-        ctx.fill()
-        ctx.strokeStyle = '#ccc'
-        ctx.lineWidth = 1
-        ctx.stroke()
-
-        // Tail
-        ctx.beginPath()
-        ctx.moveTo(x - 6, by + bh)
-        ctx.lineTo(x, by + bh + 10)
-        ctx.lineTo(x + 6, by + bh)
-        ctx.closePath()
-        ctx.fillStyle = 'white'
-        ctx.fill()
-
-        // Text
-        ctx.fillStyle = '#222'
-        lines.forEach((l, i) => {
-          ctx.fillText(l, bx + padding, by + padding + 11 + i * lineH)
-        })
-        ctx.restore()
-      }
-
-      function drawHouse(x, y) {
-        // Body
-        ctx.fillStyle = '#e8d5b0'
-        ctx.fillRect(x, y - 40, 50, 40)
-        // Roof
-        ctx.fillStyle = '#8b3a3a'
-        ctx.beginPath()
-        ctx.moveTo(x - 5, y - 40)
-        ctx.lineTo(x + 25, y - 62)
-        ctx.lineTo(x + 55, y - 40)
-        ctx.closePath()
-        ctx.fill()
-        // Door
-        ctx.fillStyle = '#7a5c3a'
-        ctx.fillRect(x + 18, y - 20, 14, 20)
-        // Window
-        ctx.fillStyle = '#aee4f5'
-        ctx.fillRect(x + 6, y - 34, 10, 9)
-        // Chimney
-        ctx.fillStyle = '#8b3a3a'
-        ctx.fillRect(x + 35, y - 68, 7, 16)
-      }
-
-      function drawOffice(x, y) {
-        ctx.fillStyle = '#b0c4d8'
-        ctx.fillRect(x, y - 55, 65, 55)
-        ctx.fillStyle = '#5a7a9a'
-        ctx.fillRect(x - 2, y - 58, 69, 7)
-        ctx.fillStyle = '#aee4f5'
-        for (let row = 0; row < 2; row++)
-          for (let col = 0; col < 3; col++)
-            ctx.fillRect(x + 5 + col * 20, y - 50 + row * 18, 12, 10)
-        ctx.fillStyle = '#3a5a7a'
-        ctx.fillRect(x + 22, y - 22, 20, 22)
-        ctx.fillStyle = '#fff'
-        ctx.font = 'bold 7px Roboto'
-        ctx.fillText('OFFICE', x + 9, y - 28)
-      }
-
-      function drawCar(x, y, dir) {
-        ctx.save()
-        if (dir === -1) { ctx.translate(x + 44, 0); ctx.scale(-1, 1); x = 0 }
-        // Body
-        ctx.fillStyle = '#c0392b'
-        ctx.beginPath()
-        ctx.roundRect(x, y, 44, 16, 4)
-        ctx.fill()
-        // Roof
-        ctx.fillStyle = '#e74c3c'
-        ctx.beginPath()
-        ctx.roundRect(x + 8, y - 9, 26, 11, 3)
-        ctx.fill()
-        // Windows
-        ctx.fillStyle = '#aee4f5'
-        ctx.fillRect(x + 10, y - 7, 9, 7)
-        ctx.fillRect(x + 22, y - 7, 9, 7)
-        // Wheels
-        ctx.fillStyle = '#111'
-        ctx.beginPath(); ctx.arc(x + 9, y + 16, 7, 0, Math.PI*2); ctx.fill()
-        ctx.beginPath(); ctx.arc(x + 35, y + 16, 7, 0, Math.PI*2); ctx.fill()
-        ctx.fillStyle = '#666'
-        ctx.beginPath(); ctx.arc(x + 9, y + 16, 3, 0, Math.PI*2); ctx.fill()
-        ctx.beginPath(); ctx.arc(x + 35, y + 16, 3, 0, Math.PI*2); ctx.fill()
-        ctx.restore()
-      }
-
-      function drawPerson(x, y) {
-        // Head
-        ctx.fillStyle = '#f5c89a'
-        ctx.beginPath(); ctx.arc(x, y - 16, 5, 0, Math.PI*2); ctx.fill()
-        // Body
-        ctx.fillStyle = '#3a3a8a'
-        ctx.fillRect(x - 4, y - 11, 8, 10)
-        // Legs
-        ctx.fillStyle = '#222'
-        ctx.fillRect(x - 3, y - 1, 3, 7)
-        ctx.fillRect(x + 0, y - 1, 3, 7)
-      }
-
-      function drawRoad() {
-        ctx.fillStyle = '#1a1a1a'
-        ctx.fillRect(0, ROAD_TOP, sc.width, ROAD_H)
-        ctx.fillStyle = '#888'
-        ctx.fillRect(0, ROAD_TOP, sc.width, 3)
-        // Dashes
-        ctx.fillStyle = '#f5e642'
-        for (let x = 0; x < sc.width; x += 60)
-          ctx.fillRect(x, ROAD_TOP + ROAD_H / 2 - 2, 32, 4)
-      }
-
-      let speechX = 0
-      let speechY = 0
-
-      function updateScene() {
-        const now = Date.now()
-        const elapsed = now - lastPhaseChange
-
-        if (phase === 'home' && elapsed > WAIT_DURATION) {
-          phase = 'leaving_home'
-          lastPhaseChange = now
-          showSpeech(leavingHomeLines[Math.floor(Math.random() * leavingHomeLines.length)])
-        } else if (phase === 'leaving_home' && elapsed > 3000) {
-          phase = 'driving_to_work'
-          carDir = 1
-          lastPhaseChange = now
-        } else if (phase === 'driving_to_work') {
-          carX += 2
-          if (carX >= officeX() - 50) {
-            carX = officeX() - 50
-            phase = 'work'
-            lastPhaseChange = now
-          }
-        } else if (phase === 'work' && elapsed > WAIT_DURATION) {
-          phase = 'leaving_work'
-          lastPhaseChange = now
-          showSpeech(leavingWorkLines[Math.floor(Math.random() * leavingWorkLines.length)])
-        } else if (phase === 'leaving_work' && elapsed > 3000) {
-          phase = 'driving_home'
-          carDir = -1
-          lastPhaseChange = now
-        } else if (phase === 'driving_home') {
-          carX -= 2
-          if (carX <= HOME_X + 55) {
-            carX = HOME_X + 55
-            phase = 'home'
-            carDir = 1
-            lastPhaseChange = now
-          }
-        }
-
-        // Speech follows car when driving, follows person when at building
-        if (phase === 'driving_to_work' || phase === 'leaving_home') {
-          speechX = carX + 22
-          speechY = CAR_Y - 5
-        } else if (phase === 'driving_home' || phase === 'leaving_work') {
-          speechX = carX + 22
-          speechY = CAR_Y - 5
-        } else if (phase === 'home' || phase === 'leaving_home') {
-          speechX = HOME_X + 25
-          speechY = GROUND_Y - 20
-        } else if (phase === 'work' || phase === 'leaving_work') {
-          speechX = officeX() + 32
-          speechY = GROUND_Y - 20
-        }
-
-        if (speechTimer > 0) {
-          speechTimer--
-          if (speechTimer < 60) speechOpacity = speechTimer / 60
-        } else {
-          speechOpacity = 0
-        }
-      }
-
-      function drawScene() {
-        ctx.clearRect(0, 0, sc.width, sc.height)
-
-        // Background strip
-        ctx.fillStyle = 'rgba(0,0,0,0.5)'
-        ctx.fillRect(0, 0, sc.width, SCENE_H)
-
-        drawRoad()
-
-        const ox = officeX()
-        drawHouse(HOME_X, GROUND_Y)
-        drawOffice(ox, GROUND_Y)
-
-        // Person only visible when at home or work (not driving)
-        if (phase === 'home') {
-          drawPerson(HOME_X + 25, GROUND_Y)
-        } else if (phase === 'work') {
-          drawPerson(ox + 32, GROUND_Y)
-        }
-
-        // Car visible when driving or parked (always except when person is inside building)
-        drawCar(carX, CAR_Y, carDir)
-
-        // Speech bubble follows the action
-        drawSpeechBubble(speechX, speechY, speechText)
-
-        updateScene()
-        requestAnimationFrame(drawScene)
-      }
-      drawScene()
-
-      // ── SUPABASE ─────────────────────────────────────────────────────
-      const { createClient } = supabase
-      const db = createClient(
-        'https://tseioongwfovxemncfko.supabase.co',
-        'sb_publishable_lLvKJsgNsZTdnqFrFLMtmA_ys9T1bUN'
-      )
-
-      const questions = {
-        start: { text: "would you work your job for free?", yes: "pays_enough", no: "need_money" },
-        need_money: { text: "Do you need more money?", yes: "take_risks", no: "quit" },
-        take_risks: { text: "Do you often take risks?", yes: "you_know", no: "yolo" },
-        pays_enough: { text: "Does it pay enough?", yes: "stay", no: "do_more" },
-        do_more: { text: "Do you feel like you can do more?", yes: "raise", no: "raise" }
-      }
-
-      const results = {
-        quit: "Yes, quit.",
-        you_know: "You know what to do.",
-        yolo: "Take more risks.",
-        stay: "No, dont quit",
-        raise: "Don't quit, ask for a raise"
-      }
-
-      async function recordResult(key) {
-        const { data } = await db.from('results').select('*').eq('result', key).single()
-        if (data) {
-          await db.from('results').update({ count: data.count + 1 }).eq('result', key)
-        } else {
-          await db.from('results').insert({ result: key, count: 1 })
-        }
-      }
-
-      async function showStats(myResult) {
-        document.getElementById('showStats').style.display = 'none'
-        const { data } = await db.from('results').select('*')
-        if (!data || data.length === 0) return
-        const total = data.reduce((sum, row) => sum + row.count, 0)
-        const mine = data.find(r => r.result === myResult)
-        const myPercent = mine ? Math.round((mine.count / total) * 100) : 0
-        let html = `<div class="stats-title">You're in the ${myPercent}% who got this result</div>`
-        data.sort((a, b) => b.count - a.count).forEach(row => {
-          const pct = Math.round((row.count / total) * 100)
-          const ismine = row.result === myResult
-          html += `
-            <div class="stat-bar-wrap">
-              <div class="stat-label"><span>${results[row.result]}</span><span>${pct}%</span></div>
-              <div class="stat-bar-bg"><div class="stat-bar-fill ${ismine ? 'mine':''}" style="width:${pct}%"></div></div>
-            </div>`
-        })
-        document.getElementById('stats').innerHTML = html
-      }
-
-      async function show(key) {
-        document.getElementById('result').innerHTML = ''
-        document.getElementById('stats').innerHTML = ''
-        if (results[key]) {
-          document.getElementById('question').innerHTML = ''
-          document.getElementById('answers').innerHTML = ''
-          await recordResult(key)
-          document.getElementById('result').innerHTML = `
-            <p>${results[key]}</p><br>
-            <button class="btn-stats" id="showStats" onclick="showStats('${key}')">See how others answered</button><br>
-            <button class="btn-restart" onclick="show('start')">Start over</button>
-          `
-          return
-        }
-        const q = questions[key]
-        document.getElementById('question').innerHTML = q.text
-        document.getElementById('answers').innerHTML = `
-          <button class="btn-yes" onclick="show('${q.yes}')">Yes</button>
-          <button class="btn-no" onclick="show('${q.no}')">No</button>
-        `
-      }
-      show('start')
-
-      // ── MAGNETIC TITLE ───────────────────────────────────────────────
-      const letters = document.querySelectorAll('.magnetic-title span')
-      function applyMagnet(clientX, clientY) {
-        letters.forEach(letter => {
-          const rect = letter.getBoundingClientRect()
-          const cx = rect.left + rect.width / 2
-          const cy = rect.top + rect.height / 2
-          const dx = clientX - cx, dy = clientY - cy
-          const dist = Math.sqrt(dx*dx + dy*dy)
-          const maxDist = 250
-          if (dist < maxDist) {
-            const force = (1 - dist/maxDist) * 100
-            letter.style.transform = `translate(${dx/dist*force}px,${dy/dist*force}px)`
-            letter.style.color = `hsl(${Math.round(Math.random()*360)},100%,75%)`
-          } else {
-            letter.style.transform = 'translate(0,0)'
-            letter.style.color = 'white'
-          }
-        })
-      }
-      document.addEventListener('mousemove', e => applyMagnet(e.clientX, e.clientY))
-      document.addEventListener('touchmove', e => applyMagnet(e.touches[0].clientX, e.touches[0].clientY), { passive: true })
-      document.addEventListener('touchend', () => {
-        letters.forEach(l => { l.style.transform='translate(0,0)'; l.style.color='white' })
-      })
-    </script>
-  </body>
-</html>
+// Supabase
+const { createClient } = supabase
