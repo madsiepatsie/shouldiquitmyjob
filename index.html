@@ -7,11 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
 
       body {
         min-height: 100vh;
@@ -27,17 +23,12 @@
 
       canvas {
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
         z-index: 0;
       }
 
-      .magnetic-title, .card {
-        position: relative;
-        z-index: 1;
-      }
+      .magnetic-title, .card { position: relative; z-index: 1; }
 
       .magnetic-title {
         display: flex;
@@ -51,7 +42,7 @@
         font-size: clamp(2.5rem, 7vw, 6rem);
         font-weight: 900;
         color: white;
-        text-shadow: 0 2px 12px rgba(0,0,0,0.4);
+        text-shadow: 0 0 20px rgba(255,100,0,0.8), 0 2px 12px rgba(0,0,0,0.6);
         display: inline-block;
         transition: transform 0.2s ease, color 0.2s ease;
         cursor: default;
@@ -59,29 +50,20 @@
       }
 
       .card {
-        background: rgba(255,255,255,0.15);
+        background: rgba(0,0,0,0.4);
         backdrop-filter: blur(16px);
         -webkit-backdrop-filter: blur(16px);
-        border: 1px solid rgba(255,255,255,0.3);
+        border: 1px solid rgba(255,255,255,0.15);
         border-radius: 16px;
         padding: 48px 40px;
         max-width: 560px;
         width: 100%;
         text-align: center;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.5);
       }
 
-      .subtitle {
-        font-size: 0.95rem;
-        color: rgba(255,255,255,0.85);
-        margin-bottom: 40px;
-      }
-
-      .divider {
-        height: 1px;
-        background: rgba(255,255,255,0.3);
-        margin-bottom: 36px;
-      }
+      .subtitle { font-size: 0.95rem; color: rgba(255,255,255,0.75); margin-bottom: 40px; }
+      .divider { height: 1px; background: rgba(255,255,255,0.15); margin-bottom: 36px; }
 
       #question {
         font-size: 1.3rem;
@@ -91,12 +73,7 @@
         line-height: 1.6;
       }
 
-      #answers {
-        display: flex;
-        gap: 12px;
-        justify-content: center;
-        flex-wrap: wrap;
-      }
+      #answers { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
 
       button {
         padding: 14px 36px;
@@ -110,65 +87,31 @@
         letter-spacing: 0.3px;
       }
 
-      button:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      }
-
+      button:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
       button:active { transform: translateY(0); }
 
       .btn-yes { background: #1fa818; color: white; }
       .btn-no { background: #ffffff; color: #d40d0d; border: 5px solid #d40d0d; }
-      .btn-restart { background: rgba(255,255,255,0.2); color: white; margin-top: 16px; border: 1px solid rgba(255,255,255,0.4); }
+      .btn-restart { background: rgba(255,255,255,0.15); color: white; margin-top: 16px; border: 1px solid rgba(255,255,255,0.3); }
       .btn-stats { background: rgba(255,255,255,0.9); color: #1a73e8; margin-top: 16px; font-weight: 700; }
 
-      #result {
-        font-size: 1.4rem;
-        font-weight: 700;
-        color: white;
-        line-height: 1.5;
-      }
-
+      #result { font-size: 1.4rem; font-weight: 700; color: white; line-height: 1.5; }
       #result p { margin-bottom: 8px; }
-
-      #stats {
-        margin-top: 28px;
-        text-align: left;
-      }
+      #stats { margin-top: 28px; text-align: left; }
 
       .stats-title {
         font-size: 0.85rem;
         font-weight: 500;
-        color: rgba(255,255,255,0.8);
+        color: rgba(255,255,255,0.7);
         text-transform: uppercase;
         letter-spacing: 0.8px;
         margin-bottom: 16px;
       }
 
       .stat-bar-wrap { margin: 12px 0; }
-
-      .stat-label {
-        font-size: 0.9rem;
-        color: white;
-        margin-bottom: 6px;
-        display: flex;
-        justify-content: space-between;
-      }
-
-      .stat-bar-bg {
-        background: rgba(255,255,255,0.2);
-        border-radius: 50px;
-        height: 8px;
-        width: 100%;
-      }
-
-      .stat-bar-fill {
-        background: rgba(255,255,255,0.8);
-        border-radius: 50px;
-        height: 8px;
-        transition: width 0.6s ease;
-      }
-
+      .stat-label { font-size: 0.9rem; color: white; margin-bottom: 6px; display: flex; justify-content: space-between; }
+      .stat-bar-bg { background: rgba(255,255,255,0.15); border-radius: 50px; height: 8px; width: 100%; }
+      .stat-bar-fill { background: rgba(255,255,255,0.7); border-radius: 50px; height: 8px; transition: width 0.6s ease; }
       .stat-bar-fill.mine { background: #4cff72; }
 
       @media (max-width: 480px) {
@@ -196,7 +139,7 @@
     </div>
 
     <script>
-      // Portal background
+      // Flame portal
       const canvas = document.getElementById('portal')
       const ctx = canvas.getContext('2d')
       let t = 0
@@ -208,6 +151,13 @@
       resize()
       window.addEventListener('resize', resize)
 
+      // Noise helper for flame texture
+      function noise(x, y, t) {
+        return Math.sin(x * 3.1 + t) * Math.cos(y * 2.7 - t * 0.8) +
+               Math.sin(x * 1.7 - t * 1.2) * Math.cos(y * 4.1 + t * 0.6) +
+               Math.sin((x + y) * 2.3 + t * 0.9) * 0.5
+      }
+
       function drawPortal() {
         const w = canvas.width
         const h = canvas.height
@@ -215,48 +165,69 @@
         const cy = h / 2
         const maxR = Math.sqrt(cx * cx + cy * cy)
 
-        ctx.clearRect(0, 0, w, h)
+        // Dark base
+        ctx.fillStyle = '#050505'
+        ctx.fillRect(0, 0, w, h)
 
-        const dominance = (Math.sin(t * 0.3) + 1) / 2
+        const dominance = (Math.sin(t * 0.25) + 1) / 2 // 0=red, 1=green
 
-        const numRings = 18
-        for (let i = numRings; i >= 0; i--) {
-          const angle = t + (i * 0.4)
-          const r = (i / numRings) * maxR
-          const greenAmount = dominance * (1 - i / numRings) + (i / numRings) * (1 - dominance)
-          const red = Math.round(220 * (1 - greenAmount) + 20 * greenAmount)
-          const green = Math.round(20 * (1 - greenAmount) + 200 * greenAmount)
+        // Draw flame spiral arms
+        const numArms = 8
+        for (let arm = 0; arm < numArms; arm++) {
+          const armAngle = (arm / numArms) * Math.PI * 2
 
-          const grad = ctx.createRadialGradient(
-            cx + Math.cos(angle) * r * 0.1,
-            cy + Math.sin(angle) * r * 0.1,
-            0, cx, cy, r
-          )
-          grad.addColorStop(0, `rgba(${red},${green},30,0)`)
-          grad.addColorStop(1, `rgba(${red},${green},30,0.85)`)
+          for (let r = maxR; r > 5; r -= 3) {
+            const progress = r / maxR // 1 at edge, 0 at center
+            const spiralAngle = armAngle - t * 1.5 + progress * 12 // spiral inward
 
-          ctx.beginPath()
-          ctx.arc(cx, cy, r, 0, Math.PI * 2)
-          ctx.fillStyle = grad
-          ctx.fill()
-        }
+            // Flame flicker using noise
+            const flicker = noise(arm * 0.5, progress * 4, t * 2) * 0.3
+            const flickerR = r * (1 + flicker * 0.08)
 
-        for (let i = 0; i < 6; i++) {
-          const angle = t * 0.8 + (i / 6) * Math.PI * 2
-          ctx.beginPath()
-          for (let r = 0; r < maxR; r += 4) {
-            const a = angle + r * 0.012
-            const x = cx + Math.cos(a) * r
-            const y = cy + Math.sin(a) * r
-            r === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y)
+            const x = cx + Math.cos(spiralAngle) * flickerR
+            const y = cy + Math.sin(spiralAngle) * flickerR
+
+            // Color: alternate green/red per arm, shift with dominance
+            const armIsGreen = (arm % 2 === 0)
+            const greenBias = armIsGreen ? dominance : (1 - dominance)
+            const flameMix = greenBias + flicker * 0.3
+
+            const red = Math.round(255 * Math.max(0, Math.min(1, 1 - flameMix * 0.85)))
+            const green = Math.round(255 * Math.max(0, Math.min(1, flameMix * 0.9)))
+            const alpha = (1 - progress * 0.6) * 0.7 + Math.abs(flicker) * 0.2
+
+            // Flame tip brightens toward center
+            const brightness = 1 - progress * 0.7
+            const size = (1 - progress * 0.5) * (w * 0.018) * (1 + Math.abs(flicker) * 0.5)
+
+            ctx.beginPath()
+            ctx.arc(x, y, size, 0, Math.PI * 2)
+            ctx.fillStyle = `rgba(${Math.round(red * brightness + 255 * (1-brightness) * 0.3)},${Math.round(green * brightness + 200 * (1-brightness) * flameMix)},${Math.round(30 * brightness)},${alpha})`
+            ctx.fill()
           }
-          const greenAmt = (Math.sin(t * 0.3 + i) + 1) / 2
-          ctx.strokeStyle = `rgba(${Math.round(255 * (1-greenAmt))},${Math.round(255 * greenAmt)},0,0.15)`
-          ctx.lineWidth = 2
-          ctx.stroke()
         }
 
-        t += 0.02
+        // Bright hot core
+        const coreGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxR * 0.25)
+        const coreGreen = dominance
+        coreGrad.addColorStop(0, `rgba(255,255,${Math.round(200 * coreGreen)},0.95)`)
+        coreGrad.addColorStop(0.3, `rgba(${Math.round(255*(1-coreGreen))},${Math.round(255*coreGreen)},0,0.5)`)
+        coreGrad.addColorStop(1, 'rgba(0,0,0,0)')
+        ctx.beginPath()
+        ctx.arc(cx, cy, maxR * 0.25, 0, Math.PI * 2)
+        ctx.fillStyle = coreGrad
+        ctx.fill()
+
+        // Outer dark vignette
+        const vigGrad = ctx.createRadialGradient(cx, cy, maxR * 0.5, cx, cy, maxR)
+        vigGrad.addColorStop(0, 'rgba(0,0,0,0)')
+        vigGrad.addColorStop(1, 'rgba(0,0,0,0.85)')
+        ctx.beginPath()
+        ctx.arc(cx, cy, maxR, 0, Math.PI * 2)
+        ctx.fillStyle = vigGrad
+        ctx.fill()
+
+        t += 0.018
         requestAnimationFrame(drawPortal)
       }
       drawPortal()
@@ -368,7 +339,7 @@
             const moveX = (distX / dist) * force
             const moveY = (distY / dist) * force
             letter.style.transform = `translate(${moveX}px, ${moveY}px)`
-            letter.style.color = `hsl(${Math.round(Math.random() * 360)}, 70%, 75%)`
+            letter.style.color = `hsl(${Math.round(Math.random() * 360)}, 100%, 75%)`
           } else {
             letter.style.transform = 'translate(0, 0)'
             letter.style.color = 'white'
