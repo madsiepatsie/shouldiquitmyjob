@@ -1,170 +1,157 @@
-font-size: clamp(2.5rem, 7vw, 6rem);
-font-weight: 900;
-color: white;
-        text-shadow: 0 0 20px rgba(255,100,0,0.8), 0 2px 12px rgba(0,0,0,0.6);
-        text-shadow: 0 0 30px rgba(0,255,80,0.9), 0 0 60px rgba(255,0,0,0.5), 0 2px 12px rgba(0,0,0,0.8);
-display: inline-block;
-transition: transform 0.2s ease, color 0.2s ease;
-cursor: default;
-line-height: 1;
-}
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💼</text></svg>">
+    <title>Should I Quit My Job?</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
 
-.card {
-        background: rgba(0,0,0,0.4);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        border: 1px solid rgba(255,255,255,0.15);
+      body {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Roboto', sans-serif;
+        padding: 24px;
+        overflow: hidden;
+        position: relative;
+      }
+
+      canvas {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        z-index: 0;
+      }
+
+      .magnetic-title, .card { position: relative; z-index: 1; }
+
+      .magnetic-title {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 32px;
+        width: 95vw;
+        max-width: 900px;
+      }
+
+      .magnetic-title span {
+        font-size: clamp(2.5rem, 7vw, 6rem);
+        font-weight: 900;
+        color: white;
+        text-shadow: 0 0 30px rgba(0,255,80,0.9), 0 0 60px rgba(255,0,0,0.5), 0 2px 12px rgba(0,0,0,0.8);
+        display: inline-block;
+        transition: transform 0.2s ease, color 0.2s ease;
+        cursor: default;
+        line-height: 1;
+      }
+
+      .card {
         background: rgba(0,0,0,0.55);
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
         border: 1px solid rgba(255,255,255,0.1);
-border-radius: 16px;
-padding: 48px 40px;
-max-width: 560px;
-width: 100%;
-text-align: center;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+        border-radius: 16px;
+        padding: 48px 40px;
+        max-width: 560px;
+        width: 100%;
+        text-align: center;
         box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 60px rgba(0,200,50,0.15);
-}
-
-      .subtitle { font-size: 0.95rem; color: rgba(255,255,255,0.75); margin-bottom: 40px; }
-      .divider { height: 1px; background: rgba(255,255,255,0.15); margin-bottom: 36px; }
-
-      #question {
-        font-size: 1.3rem;
-        font-weight: 500;
-        color: white;
-        margin-bottom: 32px;
-        line-height: 1.6;
       }
+
       .subtitle { font-size: 0.95rem; color: rgba(255,255,255,0.7); margin-bottom: 40px; }
       .divider { height: 1px; background: rgba(255,255,255,0.1); margin-bottom: 36px; }
 
       #question { font-size: 1.3rem; font-weight: 500; color: white; margin-bottom: 32px; line-height: 1.6; }
-#answers { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+      #answers { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
 
-button {
-@@ -87,32 +80,24 @@
-letter-spacing: 0.3px;
-}
+      button {
+        padding: 14px 36px;
+        font-size: 0.95rem;
+        font-family: 'Roboto', sans-serif;
+        font-weight: 500;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: box-shadow 0.2s, transform 0.1s;
+        letter-spacing: 0.3px;
+      }
 
-      button:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
       button:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,0.5); }
-button:active { transform: translateY(0); }
+      button:active { transform: translateY(0); }
 
-      .btn-yes { background: #1fa818; color: white; }
       .btn-yes { background: #1fa818; color: white; box-shadow: 0 0 20px rgba(31,168,24,0.4); }
-.btn-no { background: #ffffff; color: #d40d0d; border: 5px solid #d40d0d; }
-      .btn-restart { background: rgba(255,255,255,0.15); color: white; margin-top: 16px; border: 1px solid rgba(255,255,255,0.3); }
-      .btn-stats { background: rgba(255,255,255,0.9); color: #1a73e8; margin-top: 16px; font-weight: 700; }
+      .btn-no { background: #ffffff; color: #d40d0d; border: 5px solid #d40d0d; }
       .btn-restart { background: rgba(255,255,255,0.12); color: white; margin-top: 16px; border: 1px solid rgba(255,255,255,0.2); }
       .btn-stats { background: rgba(255,255,255,0.92); color: #1a73e8; margin-top: 16px; font-weight: 700; }
 
-#result { font-size: 1.4rem; font-weight: 700; color: white; line-height: 1.5; }
-#result p { margin-bottom: 8px; }
-#stats { margin-top: 28px; text-align: left; }
-
-      .stats-title {
-        font-size: 0.85rem;
-        font-weight: 500;
-        color: rgba(255,255,255,0.7);
-        text-transform: uppercase;
-        letter-spacing: 0.8px;
-        margin-bottom: 16px;
-      }
+      #result { font-size: 1.4rem; font-weight: 700; color: white; line-height: 1.5; }
+      #result p { margin-bottom: 8px; }
+      #stats { margin-top: 28px; text-align: left; }
 
       .stats-title { font-size: 0.85rem; font-weight: 500; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 16px; }
-.stat-bar-wrap { margin: 12px 0; }
-.stat-label { font-size: 0.9rem; color: white; margin-bottom: 6px; display: flex; justify-content: space-between; }
-      .stat-bar-bg { background: rgba(255,255,255,0.15); border-radius: 50px; height: 8px; width: 100%; }
-      .stat-bar-fill { background: rgba(255,255,255,0.7); border-radius: 50px; height: 8px; transition: width 0.6s ease; }
-      .stat-bar-fill.mine { background: #4cff72; }
+      .stat-bar-wrap { margin: 12px 0; }
+      .stat-label { font-size: 0.9rem; color: white; margin-bottom: 6px; display: flex; justify-content: space-between; }
       .stat-bar-bg { background: rgba(255,255,255,0.12); border-radius: 50px; height: 8px; width: 100%; }
       .stat-bar-fill { background: rgba(255,255,255,0.6); border-radius: 50px; height: 8px; transition: width 0.6s ease; }
       .stat-bar-fill.mine { background: #4cff72; box-shadow: 0 0 8px #4cff72; }
 
-@media (max-width: 480px) {
-.card { padding: 36px 24px; }
-@@ -139,98 +124,155 @@
-</div>
+      @media (max-width: 480px) {
+        .card { padding: 36px 24px; }
+        #question { font-size: 1.1rem; }
+        button { padding: 14px 28px; width: 100%; }
+        #answers { flex-direction: column; }
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="portal"></canvas>
 
-<script>
-      // Flame portal
+    <div class="magnetic-title" id="magneticTitle">
+      <span>s</span><span>h</span><span>o</span><span>u</span><span>l</span><span>d</span><span>i</span><span>q</span><span>u</span><span>i</span><span>t</span><span>m</span><span>y</span><span>j</span><span>o</span><span>b</span>
+    </div>
+
+    <div class="card">
+      <p class="subtitle">you will know after this</p>
+      <div class="divider"></div>
+      <div id="question"></div>
+      <div id="answers"></div>
+      <div id="result"></div>
+      <div id="stats"></div>
+    </div>
+
+    <script>
       // WebGL nether portal shader
-const canvas = document.getElementById('portal')
-      const ctx = canvas.getContext('2d')
-      let t = 0
+      const canvas = document.getElementById('portal')
       const gl = canvas.getContext('webgl')
 
-function resize() {
-canvas.width = window.innerWidth
-canvas.height = window.innerHeight
+      function resize() {
+        canvas.width = window.innerWidth
+        canvas.height = window.innerHeight
         gl.viewport(0, 0, canvas.width, canvas.height)
-}
-resize()
-window.addEventListener('resize', resize)
-
-      // Noise helper for flame texture
-      function noise(x, y, t) {
-        return Math.sin(x * 3.1 + t) * Math.cos(y * 2.7 - t * 0.8) +
-               Math.sin(x * 1.7 - t * 1.2) * Math.cos(y * 4.1 + t * 0.6) +
-               Math.sin((x + y) * 2.3 + t * 0.9) * 0.5
       }
+      resize()
+      window.addEventListener('resize', resize)
 
-      function drawPortal() {
-        const w = canvas.width
-        const h = canvas.height
-        const cx = w / 2
-        const cy = h / 2
-        const maxR = Math.sqrt(cx * cx + cy * cy)
-
-        // Dark base
-        ctx.fillStyle = '#050505'
-        ctx.fillRect(0, 0, w, h)
       const vert = `
         attribute vec2 a_pos;
         void main() { gl_Position = vec4(a_pos, 0, 1); }
       `
 
-        const dominance = (Math.sin(t * 0.25) + 1) / 2 // 0=red, 1=green
       const frag = `
         precision highp float;
         uniform vec2 u_res;
         uniform float u_time;
 
-        // Draw flame spiral arms
-        const numArms = 8
-        for (let arm = 0; arm < numArms; arm++) {
-          const armAngle = (arm / numArms) * Math.PI * 2
-
-          for (let r = maxR; r > 5; r -= 3) {
-            const progress = r / maxR // 1 at edge, 0 at center
-            const spiralAngle = armAngle - t * 1.5 + progress * 12 // spiral inward
-
-            // Flame flicker using noise
-            const flicker = noise(arm * 0.5, progress * 4, t * 2) * 0.3
-            const flickerR = r * (1 + flicker * 0.08)
-
-            const x = cx + Math.cos(spiralAngle) * flickerR
-            const y = cy + Math.sin(spiralAngle) * flickerR
-
-            // Color: alternate green/red per arm, shift with dominance
-            const armIsGreen = (arm % 2 === 0)
-            const greenBias = armIsGreen ? dominance : (1 - dominance)
-            const flameMix = greenBias + flicker * 0.3
-
-            const red = Math.round(255 * Math.max(0, Math.min(1, 1 - flameMix * 0.85)))
-            const green = Math.round(255 * Math.max(0, Math.min(1, flameMix * 0.9)))
-            const alpha = (1 - progress * 0.6) * 0.7 + Math.abs(flicker) * 0.2
         // Hash for noise
         vec2 hash2(vec2 p) {
           p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)));
           return -1.0 + 2.0 * fract(sin(p) * 43758.5453123);
         }
 
-            // Flame tip brightens toward center
-            const brightness = 1 - progress * 0.7
-            const size = (1 - progress * 0.5) * (w * 0.018) * (1 + Math.abs(flicker) * 0.5)
         // Gradient noise
         float noise(vec2 p) {
           vec2 i = floor(p);
@@ -176,10 +163,6 @@ window.addEventListener('resize', resize)
                          dot(hash2(i + vec2(1,1)), f - vec2(1,1)), u.x), u.y);
         }
 
-            ctx.beginPath()
-            ctx.arc(x, y, size, 0, Math.PI * 2)
-            ctx.fillStyle = `rgba(${Math.round(red * brightness + 255 * (1-brightness) * 0.3)},${Math.round(green * brightness + 200 * (1-brightness) * flameMix)},${Math.round(30 * brightness)},${alpha})`
-            ctx.fill()
         // Fractal brownian motion - layered noise for turbulence
         float fbm(vec2 p) {
           float v = 0.0;
@@ -190,7 +173,7 @@ window.addEventListener('resize', resize)
             v += a * noise(p);
             p = rot * p * 2.0 + shift;
             a *= 0.5;
-         }
+          }
           return v;
         }
 
@@ -254,7 +237,7 @@ window.addEventListener('resize', resize)
           r += shimmer * (1.0 - shift);
 
           gl_FragColor = vec4(r, g, b, 1.0);
-       }
+        }
       `
 
       function compile(type, src) {
@@ -264,28 +247,6 @@ window.addEventListener('resize', resize)
         return s
       }
 
-        // Bright hot core
-        const coreGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxR * 0.25)
-        const coreGreen = dominance
-        coreGrad.addColorStop(0, `rgba(255,255,${Math.round(200 * coreGreen)},0.95)`)
-        coreGrad.addColorStop(0.3, `rgba(${Math.round(255*(1-coreGreen))},${Math.round(255*coreGreen)},0,0.5)`)
-        coreGrad.addColorStop(1, 'rgba(0,0,0,0)')
-        ctx.beginPath()
-        ctx.arc(cx, cy, maxR * 0.25, 0, Math.PI * 2)
-        ctx.fillStyle = coreGrad
-        ctx.fill()
-
-        // Outer dark vignette
-        const vigGrad = ctx.createRadialGradient(cx, cy, maxR * 0.5, cx, cy, maxR)
-        vigGrad.addColorStop(0, 'rgba(0,0,0,0)')
-        vigGrad.addColorStop(1, 'rgba(0,0,0,0.85)')
-        ctx.beginPath()
-        ctx.arc(cx, cy, maxR, 0, Math.PI * 2)
-        ctx.fillStyle = vigGrad
-        ctx.fill()
-
-        t += 0.018
-        requestAnimationFrame(drawPortal)
       const prog = gl.createProgram()
       gl.attachShader(prog, compile(gl.VERTEX_SHADER, vert))
       gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, frag))
@@ -310,9 +271,135 @@ window.addEventListener('resize', resize)
         gl.uniform1f(uTime, t)
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
         requestAnimationFrame(render)
-}
-      drawPortal()
+      }
       render()
 
-// Supabase
-const { createClient } = supabase
+      // Supabase
+      const { createClient } = supabase
+      const db = createClient(
+        'https://tseioongwfovxemncfko.supabase.co',
+        'sb_publishable_lLvKJsgNsZTdnqFrFLMtmA_ys9T1bUN'
+      )
+
+      const questions = {
+        start: { text: "would you work your job for free?", yes: "pays_enough", no: "need_money" },
+        need_money: { text: "Do you need more money?", yes: "take_risks", no: "quit" },
+        take_risks: { text: "Do you often take risks?", yes: "you_know", no: "yolo" },
+        pays_enough: { text: "Does it pay enough?", yes: "stay", no: "do_more" },
+        do_more: { text: "Do you feel like you can do more?", yes: "raise", no: "raise" }
+      }
+
+      const results = {
+        quit: "Yes, quit.",
+        you_know: "You know what to do.",
+        yolo: "Take more risks.",
+        stay: "No, dont quit",
+        raise: "Don't quit, ask for a raise"
+      }
+
+      async function recordResult(key) {
+        const { data } = await db.from('results').select('*').eq('result', key).single()
+        if (data) {
+          await db.from('results').update({ count: data.count + 1 }).eq('result', key)
+        } else {
+          await db.from('results').insert({ result: key, count: 1 })
+        }
+      }
+
+      async function showStats(myResult) {
+        document.getElementById('showStats').style.display = 'none'
+        const { data } = await db.from('results').select('*')
+        if (!data || data.length === 0) return
+
+        const total = data.reduce((sum, row) => sum + row.count, 0)
+        const mine = data.find(r => r.result === myResult)
+        const myPercent = mine ? Math.round((mine.count / total) * 100) : 0
+
+        let html = `<div class="stats-title">You're in the ${myPercent}% who got this result</div>`
+
+        data.sort((a, b) => b.count - a.count).forEach(row => {
+          const pct = Math.round((row.count / total) * 100)
+          const ismine = row.result === myResult
+          html += `
+            <div class="stat-bar-wrap">
+              <div class="stat-label">
+                <span>${results[row.result]}</span>
+                <span>${pct}%</span>
+              </div>
+              <div class="stat-bar-bg">
+                <div class="stat-bar-fill ${ismine ? 'mine' : ''}" style="width:${pct}%"></div>
+              </div>
+            </div>`
+        })
+
+        document.getElementById('stats').innerHTML = html
+      }
+
+      async function show(key) {
+        document.getElementById('result').innerHTML = ''
+        document.getElementById('stats').innerHTML = ''
+
+        if (results[key]) {
+          document.getElementById('question').innerHTML = ''
+          document.getElementById('answers').innerHTML = ''
+          await recordResult(key)
+          document.getElementById('result').innerHTML = `
+            <p>${results[key]}</p>
+            <br>
+            <button class="btn-stats" id="showStats" onclick="showStats('${key}')">See how others answered</button>
+            <br>
+            <button class="btn-restart" onclick="show('start')">Start over</button>
+          `
+          return
+        }
+
+        const q = questions[key]
+        document.getElementById('question').innerHTML = q.text
+        document.getElementById('answers').innerHTML = `
+          <button class="btn-yes" onclick="show('${q.yes}')">Yes</button>
+          <button class="btn-no" onclick="show('${q.no}')">No</button>
+        `
+      }
+
+      show('start')
+
+      // Magnetic title
+      const letters = document.querySelectorAll('.magnetic-title span')
+
+      function applyMagnet(clientX, clientY) {
+        letters.forEach(letter => {
+          const rect = letter.getBoundingClientRect()
+          const centerX = rect.left + rect.width / 2
+          const centerY = rect.top + rect.height / 2
+          const distX = clientX - centerX
+          const distY = clientY - centerY
+          const dist = Math.sqrt(distX * distX + distY * distY)
+          const maxDist = 250
+
+          if (dist < maxDist) {
+            const force = (1 - dist / maxDist) * 100
+            const moveX = (distX / dist) * force
+            const moveY = (distY / dist) * force
+            letter.style.transform = `translate(${moveX}px, ${moveY}px)`
+            letter.style.color = `hsl(${Math.round(Math.random() * 360)}, 100%, 75%)`
+          } else {
+            letter.style.transform = 'translate(0, 0)'
+            letter.style.color = 'white'
+          }
+        })
+      }
+
+      document.addEventListener('mousemove', (e) => applyMagnet(e.clientX, e.clientY))
+      document.addEventListener('touchmove', (e) => {
+        const touch = e.touches[0]
+        applyMagnet(touch.clientX, touch.clientY)
+      }, { passive: true })
+      document.addEventListener('touchend', () => {
+        letters.forEach(letter => {
+          letter.style.transform = 'translate(0, 0)'
+          letter.style.color = 'white'
+        })
+      })
+    </script>
+  </body>
+</html>
