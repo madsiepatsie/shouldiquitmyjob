@@ -8,7 +8,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
       * { box-sizing: border-box; margin: 0; padding: 0; }
-
       body {
         min-height: 100vh;
         display: flex;
@@ -20,14 +19,12 @@
         overflow: hidden;
         position: relative;
       }
-
       canvas#portal {
         position: fixed;
         top: 0; left: 0;
         width: 100%; height: 100%;
         z-index: 0;
       }
-
       canvas#scene {
         position: fixed;
         bottom: 0; left: 0;
@@ -35,9 +32,7 @@
         z-index: 2;
         pointer-events: none;
       }
-
       .magnetic-title, .card { position: relative; z-index: 1; }
-
       .magnetic-title {
         display: flex;
         justify-content: center;
@@ -45,7 +40,6 @@
         width: 95vw;
         max-width: 900px;
       }
-
       .magnetic-title span {
         font-size: clamp(2.5rem, 7vw, 6rem);
         font-weight: 900;
@@ -56,7 +50,6 @@
         cursor: default;
         line-height: 1;
       }
-
       .card {
         background: rgba(0,0,0,0.55);
         backdrop-filter: blur(20px);
@@ -69,12 +62,10 @@
         text-align: center;
         box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 60px rgba(0,200,50,0.15);
       }
-
       .subtitle { font-size: 0.95rem; color: rgba(255,255,255,0.7); margin-bottom: 40px; }
       .divider { height: 1px; background: rgba(255,255,255,0.1); margin-bottom: 36px; }
       #question { font-size: 1.3rem; font-weight: 500; color: white; margin-bottom: 32px; line-height: 1.6; }
       #answers { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-
       button {
         padding: 14px 36px;
         font-size: 0.95rem;
@@ -86,55 +77,21 @@
         transition: box-shadow 0.2s, transform 0.1s;
         letter-spacing: 0.3px;
       }
-
       button:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,0.5); }
       button:active { transform: translateY(0); }
-
       .btn-yes { background: #1fa818; color: white; box-shadow: 0 0 20px rgba(31,168,24,0.4); }
       .btn-no { background: #ffffff; color: #d40d0d; border: 5px solid #d40d0d; }
       .btn-restart { background: rgba(255,255,255,0.12); color: white; margin-top: 16px; border: 1px solid rgba(255,255,255,0.2); }
       .btn-stats { background: rgba(255,255,255,0.92); color: #1a73e8; margin-top: 16px; font-weight: 700; }
-
       #result { font-size: 1.4rem; font-weight: 700; color: white; line-height: 1.5; }
       #result p { margin-bottom: 8px; }
       #stats { margin-top: 28px; text-align: left; }
-
       .stats-title { font-size: 0.85rem; font-weight: 500; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 16px; }
       .stat-bar-wrap { margin: 12px 0; }
       .stat-label { font-size: 0.9rem; color: white; margin-bottom: 6px; display: flex; justify-content: space-between; }
       .stat-bar-bg { background: rgba(255,255,255,0.12); border-radius: 50px; height: 8px; width: 100%; }
       .stat-bar-fill { background: rgba(255,255,255,0.6); border-radius: 50px; height: 8px; transition: width 0.6s ease; }
       .stat-bar-fill.mine { background: #4cff72; box-shadow: 0 0 8px #4cff72; }
-
-      #speech {
-        position: fixed;
-        bottom: 170px;
-        left: 20px;
-        z-index: 10;
-        background: white;
-        color: #222;
-        font-size: 0.75rem;
-        font-family: 'Roboto', sans-serif;
-        font-weight: 500;
-        padding: 8px 12px;
-        border-radius: 12px;
-        max-width: 200px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        opacity: 0;
-        transition: opacity 0.4s;
-        pointer-events: none;
-      }
-
-      #speech::after {
-        content: '';
-        position: absolute;
-        bottom: -8px;
-        left: 20px;
-        border: 8px solid transparent;
-        border-top-color: white;
-        border-bottom: 0;
-      }
-
       @media (max-width: 480px) {
         .card { padding: 36px 24px; }
         #question { font-size: 1.1rem; }
@@ -146,7 +103,6 @@
   <body>
     <canvas id="portal"></canvas>
     <canvas id="scene"></canvas>
-    <div id="speech"></div>
 
     <div class="magnetic-title" id="magneticTitle">
       <span>s</span><span>h</span><span>o</span><span>u</span><span>l</span><span>d</span><span>i</span><span>q</span><span>u</span><span>i</span><span>t</span><span>m</span><span>y</span><span>j</span><span>o</span><span>b</span>
@@ -162,10 +118,9 @@
     </div>
 
     <script>
-      // ── PORTAL (WebGL) ──────────────────────────────────────────────
+      // ── PORTAL WebGL ─────────────────────────────────────────────────
       const portalCanvas = document.getElementById('portal')
       const gl = portalCanvas.getContext('webgl')
-
       function resizePortal() {
         portalCanvas.width = window.innerWidth
         portalCanvas.height = window.innerHeight
@@ -174,125 +129,87 @@
       resizePortal()
       window.addEventListener('resize', resizePortal)
 
-      const vert = `
-        attribute vec2 a_pos;
-        void main() { gl_Position = vec4(a_pos, 0, 1); }
-      `
+      const vert = `attribute vec2 a_pos; void main(){gl_Position=vec4(a_pos,0,1);}`
       const frag = `
         precision highp float;
-        uniform vec2 u_res;
-        uniform float u_time;
-
-        vec2 hash2(vec2 p) {
-          p = vec2(dot(p, vec2(127.1,311.7)), dot(p, vec2(269.5,183.3)));
-          return -1.0 + 2.0 * fract(sin(p) * 43758.5453123);
-        }
-
-        float noise(vec2 p) {
-          vec2 i = floor(p), f = fract(p);
-          vec2 u = f*f*(3.0-2.0*f);
-          return mix(mix(dot(hash2(i+vec2(0,0)),f-vec2(0,0)),
-                         dot(hash2(i+vec2(1,0)),f-vec2(1,0)),u.x),
-                     mix(dot(hash2(i+vec2(0,1)),f-vec2(0,1)),
-                         dot(hash2(i+vec2(1,1)),f-vec2(1,1)),u.x),u.y);
-        }
-
-        float fbm(vec2 p) {
-          float v=0.0, a=0.5;
-          vec2 shift=vec2(100.0);
-          mat2 rot=mat2(cos(0.5),sin(0.5),-sin(0.5),cos(0.5));
-          for(int i=0;i<6;i++){v+=a*noise(p);p=rot*p*2.0+shift;a*=0.5;}
-          return v;
-        }
-
-        void main() {
-          vec2 uv = (gl_FragCoord.xy - u_res*0.5) / min(u_res.x,u_res.y);
-          float dist = length(uv);
-          float angle = atan(uv.y,uv.x);
-          float spiral = angle/(2.0*3.14159) + dist*2.5 - u_time*0.4;
-          vec2 turbUV = vec2(spiral*3.0+dist*2.0, dist*4.0-u_time*0.6);
-          float q1 = fbm(turbUV+u_time*0.15);
-          float q2 = fbm(turbUV+vec2(q1*1.5,q1)+u_time*0.1);
-          float portal = fbm(turbUV+vec2(q1,q2)*1.8);
-          float shift = sin(u_time*0.3)*0.5+0.5;
-          float innerGlow = smoothstep(0.6,0.0,dist);
-          float midGlow = smoothstep(0.9,0.3,dist);
-          float edge = smoothstep(1.1,0.5,dist);
-          float flame = pow(portal*0.5+0.5, 1.4);
-          float g = flame*shift*1.4*midGlow;
-          float r = flame*(1.0-shift)*1.4*midGlow;
-          float core = pow(innerGlow,2.0)*0.8;
-          r+=core*0.6; g+=core*0.9;
-          float b=core*0.3;
-          float void_=smoothstep(0.15,0.05,dist);
-          r=mix(r,0.0,void_); g=mix(g,0.02,void_); b=mix(b,0.05,void_);
+        uniform vec2 u_res; uniform float u_time;
+        vec2 hash2(vec2 p){p=vec2(dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3)));return -1.0+2.0*fract(sin(p)*43758.5453123);}
+        float noise(vec2 p){vec2 i=floor(p),f=fract(p),u=f*f*(3.0-2.0*f);return mix(mix(dot(hash2(i),f),dot(hash2(i+vec2(1,0)),f-vec2(1,0)),u.x),mix(dot(hash2(i+vec2(0,1)),f-vec2(0,1)),dot(hash2(i+vec2(1,1)),f-vec2(1,1)),u.x),u.y);}
+        float fbm(vec2 p){float v=0.0,a=0.5;mat2 rot=mat2(cos(0.5),sin(0.5),-sin(0.5),cos(0.5));for(int i=0;i<6;i++){v+=a*noise(p);p=rot*p*2.0+vec2(100.0);a*=0.5;}return v;}
+        void main(){
+          vec2 uv=(gl_FragCoord.xy-u_res*0.5)/min(u_res.x,u_res.y);
+          float dist=length(uv),angle=atan(uv.y,uv.x);
+          float spiral=angle/(2.0*3.14159)+dist*2.5-u_time*0.4;
+          vec2 tuv=vec2(spiral*3.0+dist*2.0,dist*4.0-u_time*0.6);
+          float q1=fbm(tuv+u_time*0.15),q2=fbm(tuv+vec2(q1*1.5,q1)+u_time*0.1);
+          float portal=fbm(tuv+vec2(q1,q2)*1.8);
+          float sh=sin(u_time*0.3)*0.5+0.5;
+          float mid=smoothstep(0.9,0.3,dist),edge=smoothstep(1.1,0.5,dist);
+          float flame=pow(portal*0.5+0.5,1.4);
+          float g=flame*sh*1.4*mid,r=flame*(1.0-sh)*1.4*mid;
+          float core=pow(smoothstep(0.6,0.0,dist),2.0)*0.8;
+          r+=core*0.6;g+=core*0.9;float b=core*0.3;
+          float vd=smoothstep(0.15,0.05,dist);
+          r=mix(r,0.0,vd);g=mix(g,0.02,vd);b=mix(b,0.05,vd);
           float outer=smoothstep(1.05,0.7,dist);
-          r*=outer*edge; g*=outer*edge; b*=outer;
-          float shimmer=sin(spiral*20.0+u_time*3.0)*0.04*midGlow;
-          g+=shimmer*shift; r+=shimmer*(1.0-shift);
+          r*=outer*edge;g*=outer*edge;b*=outer;
+          float shim=sin(spiral*20.0+u_time*3.0)*0.04*mid;
+          g+=shim*sh;r+=shim*(1.0-sh);
           gl_FragColor=vec4(r,g,b,1.0);
         }
       `
-
-      function compile(type, src) {
-        const s = gl.createShader(type)
-        gl.shaderSource(s, src)
-        gl.compileShader(s)
-        return s
-      }
-
+      function compile(type, src) { const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);return s; }
       const prog = gl.createProgram()
       gl.attachShader(prog, compile(gl.VERTEX_SHADER, vert))
       gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, frag))
-      gl.linkProgram(prog)
-      gl.useProgram(prog)
-
+      gl.linkProgram(prog); gl.useProgram(prog)
       const buf = gl.createBuffer()
       gl.bindBuffer(gl.ARRAY_BUFFER, buf)
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,1]), gl.STATIC_DRAW)
-      const loc = gl.getAttribLocation(prog, 'a_pos')
-      gl.enableVertexAttribArray(loc)
-      gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0)
-      const uRes = gl.getUniformLocation(prog, 'u_res')
-      const uTime = gl.getUniformLocation(prog, 'u_time')
-      const portalStart = Date.now()
-
+      const aloc = gl.getAttribLocation(prog,'a_pos')
+      gl.enableVertexAttribArray(aloc); gl.vertexAttribPointer(aloc,2,gl.FLOAT,false,0,0)
+      const uRes=gl.getUniformLocation(prog,'u_res'), uTime=gl.getUniformLocation(prog,'u_time')
+      const pStart = Date.now()
       function renderPortal() {
-        const t = (Date.now() - portalStart) / 1000
-        gl.uniform2f(uRes, portalCanvas.width, portalCanvas.height)
-        gl.uniform1f(uTime, t)
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
+        const t=(Date.now()-pStart)/1000
+        gl.uniform2f(uRes,portalCanvas.width,portalCanvas.height)
+        gl.uniform1f(uTime,t)
+        gl.drawArrays(gl.TRIANGLE_STRIP,0,4)
         requestAnimationFrame(renderPortal)
       }
       renderPortal()
 
-      // ── LITTLE SCENE ────────────────────────────────────────────────
+      // ── SCENE ────────────────────────────────────────────────────────
       const sc = document.getElementById('scene')
       const ctx = sc.getContext('2d')
 
-      function resizeScene() {
-        sc.width = window.innerWidth
-        sc.height = 160
-      }
+      function resizeScene() { sc.width = window.innerWidth; sc.height = 160 }
       resizeScene()
       window.addEventListener('resize', resizeScene)
 
-      // State machine
-      // phases: 'home', 'driving_to_work', 'work', 'driving_home'
+      const SCENE_H = 160
+      const ROAD_TOP = SCENE_H - 50      // top of road
+      const ROAD_H = 50
+      const GROUND_Y = ROAD_TOP          // buildings sit on road top
+      const CAR_Y = ROAD_TOP + 8         // car sits ON the road
+
+      const HOME_X = 20
+      const officeX = () => sc.width - 90
+
+      // Car starts parked outside home
+      let carX = HOME_X + 55
+      let carDir = 1
+
+      // Phase: 'home' | 'leaving_home' | 'driving_to_work' | 'work' | 'leaving_work' | 'driving_home'
       let phase = 'home'
-      let phaseTimer = 0
-      const PHASE_DURATION = 60000 // 1 minute per phase
+      let lastPhaseChange = Date.now()
+      const WAIT_DURATION = 60000
 
-      let carX = 0
-      let carDir = 1 // 1 = right, -1 = left
-      let driving = false
-
-      const speechEl = document.getElementById('speech')
       const leavingHomeLines = [
         "ugh, another day...",
         "maybe i should just quit",
-        "why am i even doing this",
         "i really don't like my job",
+        "why am i even doing this",
         "is this really my life?",
       ]
       const leavingWorkLines = [
@@ -303,202 +220,252 @@
         "see you tomorrow i suppose...",
       ]
 
+      let speechText = ''
+      let speechOpacity = 0
+      let speechTimer = 0
+
       function showSpeech(text) {
-        speechEl.textContent = text
-        speechEl.style.opacity = '1'
-        setTimeout(() => { speechEl.style.opacity = '0' }, 4000)
+        speechText = text
+        speechOpacity = 1
+        speechTimer = 240 // frames to show
+      }
+
+      function drawSpeechBubble(x, y, text) {
+        if (speechOpacity <= 0 || !text) return
+        ctx.save()
+        ctx.globalAlpha = speechOpacity
+        ctx.font = '11px Roboto, sans-serif'
+        const padding = 8
+        const maxWidth = 160
+        // Word wrap
+        const words = text.split(' ')
+        const lines = []
+        let line = ''
+        for (const word of words) {
+          const test = line + (line ? ' ' : '') + word
+          if (ctx.measureText(test).width > maxWidth) { lines.push(line); line = word }
+          else line = test
+        }
+        lines.push(line)
+        const lineH = 14
+        const bw = maxWidth + padding * 2
+        const bh = lines.length * lineH + padding * 2
+        let bx = x - bw / 2
+        // keep on screen
+        bx = Math.max(4, Math.min(sc.width - bw - 4, bx))
+        const by = y - bh - 12
+
+        // Bubble
+        ctx.fillStyle = 'white'
+        ctx.beginPath()
+        ctx.roundRect(bx, by, bw, bh, 8)
+        ctx.fill()
+        ctx.strokeStyle = '#ccc'
+        ctx.lineWidth = 1
+        ctx.stroke()
+
+        // Tail
+        ctx.beginPath()
+        ctx.moveTo(x - 6, by + bh)
+        ctx.lineTo(x, by + bh + 10)
+        ctx.lineTo(x + 6, by + bh)
+        ctx.closePath()
+        ctx.fillStyle = 'white'
+        ctx.fill()
+
+        // Text
+        ctx.fillStyle = '#222'
+        lines.forEach((l, i) => {
+          ctx.fillText(l, bx + padding, by + padding + 11 + i * lineH)
+        })
+        ctx.restore()
       }
 
       function drawHouse(x, y) {
         // Body
         ctx.fillStyle = '#e8d5b0'
-        ctx.fillRect(x, y, 50, 40)
+        ctx.fillRect(x, y - 40, 50, 40)
         // Roof
         ctx.fillStyle = '#8b3a3a'
         ctx.beginPath()
-        ctx.moveTo(x - 5, y)
-        ctx.lineTo(x + 25, y - 22)
-        ctx.lineTo(x + 55, y)
+        ctx.moveTo(x - 5, y - 40)
+        ctx.lineTo(x + 25, y - 62)
+        ctx.lineTo(x + 55, y - 40)
         ctx.closePath()
         ctx.fill()
         // Door
         ctx.fillStyle = '#7a5c3a'
-        ctx.fillRect(x + 18, y + 20, 14, 20)
+        ctx.fillRect(x + 18, y - 20, 14, 20)
         // Window
         ctx.fillStyle = '#aee4f5'
-        ctx.fillRect(x + 6, y + 10, 12, 10)
-        ctx.fillStyle = '#7a5c3a'
-        ctx.fillRect(x + 11, y + 10, 1, 10)
-        ctx.fillRect(x + 6, y + 15, 12, 1)
+        ctx.fillRect(x + 6, y - 34, 10, 9)
         // Chimney
         ctx.fillStyle = '#8b3a3a'
-        ctx.fillRect(x + 35, y - 28, 8, 16)
+        ctx.fillRect(x + 35, y - 68, 7, 16)
       }
 
       function drawOffice(x, y) {
-        // Body
         ctx.fillStyle = '#b0c4d8'
-        ctx.fillRect(x, y, 65, 50)
-        // Roof flat
+        ctx.fillRect(x, y - 55, 65, 55)
         ctx.fillStyle = '#5a7a9a'
-        ctx.fillRect(x - 3, y - 5, 71, 8)
-        // Windows grid
+        ctx.fillRect(x - 2, y - 58, 69, 7)
         ctx.fillStyle = '#aee4f5'
-        for (let row = 0; row < 2; row++) {
-          for (let col = 0; col < 3; col++) {
-            ctx.fillRect(x + 6 + col * 20, y + 8 + row * 18, 12, 10)
-          }
-        }
-        // Door
+        for (let row = 0; row < 2; row++)
+          for (let col = 0; col < 3; col++)
+            ctx.fillRect(x + 5 + col * 20, y - 50 + row * 18, 12, 10)
         ctx.fillStyle = '#3a5a7a'
-        ctx.fillRect(x + 22, y + 28, 20, 22)
-        // Sign
+        ctx.fillRect(x + 22, y - 22, 20, 22)
         ctx.fillStyle = '#fff'
         ctx.font = 'bold 7px Roboto'
-        ctx.fillText('OFFICE', x + 10, y + 22)
+        ctx.fillText('OFFICE', x + 9, y - 28)
       }
 
       function drawCar(x, y, dir) {
         ctx.save()
-        if (dir === -1) {
-          ctx.scale(-1, 1)
-          x = -x - 44
-        }
+        if (dir === -1) { ctx.translate(x + 44, 0); ctx.scale(-1, 1); x = 0 }
         // Body
         ctx.fillStyle = '#c0392b'
         ctx.beginPath()
-        ctx.roundRect(x, y, 44, 18, 4)
+        ctx.roundRect(x, y, 44, 16, 4)
         ctx.fill()
         // Roof
         ctx.fillStyle = '#e74c3c'
         ctx.beginPath()
-        ctx.roundRect(x + 8, y - 10, 26, 12, 3)
+        ctx.roundRect(x + 8, y - 9, 26, 11, 3)
         ctx.fill()
         // Windows
         ctx.fillStyle = '#aee4f5'
-        ctx.fillRect(x + 10, y - 8, 10, 8)
-        ctx.fillRect(x + 22, y - 8, 10, 8)
+        ctx.fillRect(x + 10, y - 7, 9, 7)
+        ctx.fillRect(x + 22, y - 7, 9, 7)
         // Wheels
-        ctx.fillStyle = '#222'
-        ctx.beginPath()
-        ctx.arc(x + 9, y + 17, 7, 0, Math.PI * 2)
-        ctx.fill()
-        ctx.beginPath()
-        ctx.arc(x + 35, y + 17, 7, 0, Math.PI * 2)
-        ctx.fill()
-        ctx.fillStyle = '#888'
-        ctx.beginPath()
-        ctx.arc(x + 9, y + 17, 3, 0, Math.PI * 2)
-        ctx.fill()
-        ctx.beginPath()
-        ctx.arc(x + 35, y + 17, 3, 0, Math.PI * 2)
-        ctx.fill()
-        // Headlights
-        ctx.fillStyle = dir === 1 ? '#ffe97a' : '#ff7a7a'
-        ctx.fillRect(x + (dir === 1 ? 40 : 0), y + 4, 4, 6)
+        ctx.fillStyle = '#111'
+        ctx.beginPath(); ctx.arc(x + 9, y + 16, 7, 0, Math.PI*2); ctx.fill()
+        ctx.beginPath(); ctx.arc(x + 35, y + 16, 7, 0, Math.PI*2); ctx.fill()
+        ctx.fillStyle = '#666'
+        ctx.beginPath(); ctx.arc(x + 9, y + 16, 3, 0, Math.PI*2); ctx.fill()
+        ctx.beginPath(); ctx.arc(x + 35, y + 16, 3, 0, Math.PI*2); ctx.fill()
         ctx.restore()
       }
 
       function drawPerson(x, y) {
-        // Body
-        ctx.fillStyle = '#3a3a8a'
-        ctx.fillRect(x - 4, y, 8, 12)
         // Head
         ctx.fillStyle = '#f5c89a'
-        ctx.beginPath()
-        ctx.arc(x, y - 5, 6, 0, Math.PI * 2)
-        ctx.fill()
+        ctx.beginPath(); ctx.arc(x, y - 16, 5, 0, Math.PI*2); ctx.fill()
+        // Body
+        ctx.fillStyle = '#3a3a8a'
+        ctx.fillRect(x - 4, y - 11, 8, 10)
         // Legs
         ctx.fillStyle = '#222'
-        ctx.fillRect(x - 4, y + 12, 3, 8)
-        ctx.fillRect(x + 1, y + 12, 3, 8)
+        ctx.fillRect(x - 3, y - 1, 3, 7)
+        ctx.fillRect(x + 0, y - 1, 3, 7)
       }
 
-      // Ground
-      function drawGround() {
-        ctx.fillStyle = 'rgba(0,0,0,0.45)'
-        ctx.fillRect(0, 0, sc.width, sc.height)
-        // Road
-        ctx.fillStyle = '#2c2c2c'
-        ctx.fillRect(0, sc.height - 30, sc.width, 30)
-        // Road markings
-        ctx.fillStyle = '#f5e642'
-        for (let x = 0; x < sc.width; x += 60) {
-          ctx.fillRect(x, sc.height - 16, 30, 4)
-        }
-        // Pavement edge
+      function drawRoad() {
+        ctx.fillStyle = '#1a1a1a'
+        ctx.fillRect(0, ROAD_TOP, sc.width, ROAD_H)
         ctx.fillStyle = '#888'
-        ctx.fillRect(0, sc.height - 32, sc.width, 4)
+        ctx.fillRect(0, ROAD_TOP, sc.width, 3)
+        // Dashes
+        ctx.fillStyle = '#f5e642'
+        for (let x = 0; x < sc.width; x += 60)
+          ctx.fillRect(x, ROAD_TOP + ROAD_H / 2 - 2, 32, 4)
       }
 
-      // positions
-      const GROUND_Y = sc.height - 32
-      const HOME_X = 20
-      const OFFICE_X_FN = () => sc.width - 85
-      const CAR_HOME_X = HOME_X + 52
-      const CAR_WORK_X_FN = () => OFFICE_X_FN() - 50
-
-      let carXPos = CAR_HOME_X
-      let lastPhaseChange = Date.now()
+      let speechX = 0
+      let speechY = 0
 
       function updateScene() {
         const now = Date.now()
         const elapsed = now - lastPhaseChange
 
-        if (phase === 'home' && elapsed > PHASE_DURATION) {
+        if (phase === 'home' && elapsed > WAIT_DURATION) {
+          phase = 'leaving_home'
+          lastPhaseChange = now
+          showSpeech(leavingHomeLines[Math.floor(Math.random() * leavingHomeLines.length)])
+        } else if (phase === 'leaving_home' && elapsed > 3000) {
           phase = 'driving_to_work'
           carDir = 1
           lastPhaseChange = now
-          showSpeech(leavingHomeLines[Math.floor(Math.random() * leavingHomeLines.length)])
         } else if (phase === 'driving_to_work') {
-          carXPos += 1.5
-          if (carXPos >= CAR_WORK_X_FN()) {
-            carXPos = CAR_WORK_X_FN()
+          carX += 2
+          if (carX >= officeX() - 50) {
+            carX = officeX() - 50
             phase = 'work'
             lastPhaseChange = now
           }
-        } else if (phase === 'work' && elapsed > PHASE_DURATION) {
+        } else if (phase === 'work' && elapsed > WAIT_DURATION) {
+          phase = 'leaving_work'
+          lastPhaseChange = now
+          showSpeech(leavingWorkLines[Math.floor(Math.random() * leavingWorkLines.length)])
+        } else if (phase === 'leaving_work' && elapsed > 3000) {
           phase = 'driving_home'
           carDir = -1
           lastPhaseChange = now
-          showSpeech(leavingWorkLines[Math.floor(Math.random() * leavingWorkLines.length)])
         } else if (phase === 'driving_home') {
-          carXPos -= 1.5
-          if (carXPos <= CAR_HOME_X) {
-            carXPos = CAR_HOME_X
+          carX -= 2
+          if (carX <= HOME_X + 55) {
+            carX = HOME_X + 55
             phase = 'home'
             carDir = 1
             lastPhaseChange = now
           }
         }
+
+        // Speech follows car when driving, follows person when at building
+        if (phase === 'driving_to_work' || phase === 'leaving_home') {
+          speechX = carX + 22
+          speechY = CAR_Y - 5
+        } else if (phase === 'driving_home' || phase === 'leaving_work') {
+          speechX = carX + 22
+          speechY = CAR_Y - 5
+        } else if (phase === 'home' || phase === 'leaving_home') {
+          speechX = HOME_X + 25
+          speechY = GROUND_Y - 20
+        } else if (phase === 'work' || phase === 'leaving_work') {
+          speechX = officeX() + 32
+          speechY = GROUND_Y - 20
+        }
+
+        if (speechTimer > 0) {
+          speechTimer--
+          if (speechTimer < 60) speechOpacity = speechTimer / 60
+        } else {
+          speechOpacity = 0
+        }
       }
 
       function drawScene() {
         ctx.clearRect(0, 0, sc.width, sc.height)
-        drawGround()
 
-        const officeX = OFFICE_X_FN()
+        // Background strip
+        ctx.fillStyle = 'rgba(0,0,0,0.5)'
+        ctx.fillRect(0, 0, sc.width, SCENE_H)
 
-        // Draw buildings
-        drawHouse(HOME_X, GROUND_Y - 40)
-        drawOffice(officeX, GROUND_Y - 50)
+        drawRoad()
 
-        // Person walking animation when at home or work
+        const ox = officeX()
+        drawHouse(HOME_X, GROUND_Y)
+        drawOffice(ox, GROUND_Y)
+
+        // Person only visible when at home or work (not driving)
         if (phase === 'home') {
-          drawPerson(HOME_X + 25, GROUND_Y - 20)
+          drawPerson(HOME_X + 25, GROUND_Y)
         } else if (phase === 'work') {
-          drawPerson(officeX + 32, GROUND_Y - 20)
+          drawPerson(ox + 32, GROUND_Y)
         }
 
-        // Car
-        drawCar(carXPos, GROUND_Y - 24, carDir)
+        // Car visible when driving or parked (always except when person is inside building)
+        drawCar(carX, CAR_Y, carDir)
+
+        // Speech bubble follows the action
+        drawSpeechBubble(speechX, speechY, speechText)
 
         updateScene()
         requestAnimationFrame(drawScene)
       }
       drawScene()
 
-      // ── SUPABASE ────────────────────────────────────────────────────
+      // ── SUPABASE ─────────────────────────────────────────────────────
       const { createClient } = supabase
       const db = createClient(
         'https://tseioongwfovxemncfko.supabase.co',
@@ -544,7 +511,7 @@
           html += `
             <div class="stat-bar-wrap">
               <div class="stat-label"><span>${results[row.result]}</span><span>${pct}%</span></div>
-              <div class="stat-bar-bg"><div class="stat-bar-fill ${ismine ? 'mine' : ''}" style="width:${pct}%"></div></div>
+              <div class="stat-bar-bg"><div class="stat-bar-fill ${ismine ? 'mine':''}" style="width:${pct}%"></div></div>
             </div>`
         })
         document.getElementById('stats').innerHTML = html
@@ -573,21 +540,19 @@
       }
       show('start')
 
-      // ── MAGNETIC TITLE ──────────────────────────────────────────────
+      // ── MAGNETIC TITLE ───────────────────────────────────────────────
       const letters = document.querySelectorAll('.magnetic-title span')
-
       function applyMagnet(clientX, clientY) {
         letters.forEach(letter => {
           const rect = letter.getBoundingClientRect()
-          const centerX = rect.left + rect.width / 2
-          const centerY = rect.top + rect.height / 2
-          const distX = clientX - centerX
-          const distY = clientY - centerY
-          const dist = Math.sqrt(distX * distX + distY * distY)
+          const cx = rect.left + rect.width / 2
+          const cy = rect.top + rect.height / 2
+          const dx = clientX - cx, dy = clientY - cy
+          const dist = Math.sqrt(dx*dx + dy*dy)
           const maxDist = 250
           if (dist < maxDist) {
-            const force = (1 - dist / maxDist) * 100
-            letter.style.transform = `translate(${(distX/dist)*force}px, ${(distY/dist)*force}px)`
+            const force = (1 - dist/maxDist) * 100
+            letter.style.transform = `translate(${dx/dist*force}px,${dy/dist*force}px)`
             letter.style.color = `hsl(${Math.round(Math.random()*360)},100%,75%)`
           } else {
             letter.style.transform = 'translate(0,0)'
@@ -595,13 +560,10 @@
           }
         })
       }
-
-      document.addEventListener('mousemove', (e) => applyMagnet(e.clientX, e.clientY))
-      document.addEventListener('touchmove', (e) => {
-        applyMagnet(e.touches[0].clientX, e.touches[0].clientY)
-      }, { passive: true })
+      document.addEventListener('mousemove', e => applyMagnet(e.clientX, e.clientY))
+      document.addEventListener('touchmove', e => applyMagnet(e.touches[0].clientX, e.touches[0].clientY), { passive: true })
       document.addEventListener('touchend', () => {
-        letters.forEach(l => { l.style.transform = 'translate(0,0)'; l.style.color = 'white' })
+        letters.forEach(l => { l.style.transform='translate(0,0)'; l.style.color='white' })
       })
     </script>
   </body>
