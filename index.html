@@ -184,18 +184,18 @@
       )
 
       const questions = {
-        start: { text: "Do you like your job?", yes: "pays_enough", no: "need_money" },
-        need_money: { text: "Do you even need more money?", yes: "take_risks", no: "quit" },
+        start: { text: "would you work your job for free?", yes: "pays_enough", no: "need_money" },
+        need_money: { text: "Do you need more money?", yes: "take_risks", no: "quit" },
         take_risks: { text: "Do you often take risks?", yes: "you_know", no: "yolo" },
         pays_enough: { text: "Does it pay enough?", yes: "stay", no: "do_more" },
         do_more: { text: "Do you feel like you can do more?", yes: "raise", no: "raise" }
       }
 
       const results = {
-        quit: "Yes, you should quit.",
+        quit: "Yes, quit.",
         you_know: "You know what to do.",
-        yolo: "Take more risks. YOLO.",
-        stay: "no, dont quit",
+        yolo: "Take more risks.",
+        stay: "No, dont quit",
         raise: "Don't quit, but ask for a raise"
       }
 
@@ -276,10 +276,10 @@
           const distX = clientX - centerX
           const distY = clientY - centerY
           const dist = Math.sqrt(distX * distX + distY * distY)
-          const maxDist = 150
+          const maxDist = 250
 
           if (dist < maxDist) {
-            const force = (1 - dist / maxDist) * 60
+            const force = (1 - dist / maxDist) * 100
             const moveX = (distX / dist) * force
             const moveY = (distY / dist) * force
             letter.style.transform = `translate(${moveX}px, ${moveY}px)`
